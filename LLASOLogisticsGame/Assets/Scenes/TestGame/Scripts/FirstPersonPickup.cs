@@ -12,6 +12,7 @@ public class FirstPersonPickup : MonoBehaviour
     private Transform originalParent;
     private bool originalUseGravity;
     private bool originalIsKinematic;
+    private ItemInspector inspector;
 
     private void Awake()
     {
@@ -19,6 +20,8 @@ public class FirstPersonPickup : MonoBehaviour
             "Interact",
             InputActionType.Button,
             "<Keyboard>/e");
+        
+        inspector = FindFirstObjectByType<ItemInspector>();
     }
 
     private void OnEnable()
@@ -114,6 +117,11 @@ public class FirstPersonPickup : MonoBehaviour
         heldBody.transform.localRotation = Quaternion.identity;
 
         Debug.Log("Pickup check: Picked up " + heldBody.name);
+
+        if (inspector != null)
+        {
+            inspector.heldItem = heldBody.GetComponentInParent<ItemInfo>();
+        }
     }
 
 
@@ -127,6 +135,11 @@ public class FirstPersonPickup : MonoBehaviour
         heldBody.transform.SetParent(originalParent, true);
         heldBody.useGravity = originalUseGravity;
         heldBody.isKinematic = originalIsKinematic;
+
+        if (inspector != null)
+        {
+            inspector.heldItem = null;
+        }
 
         heldBody = null;
         originalParent = null;
