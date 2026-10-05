@@ -7,11 +7,18 @@ public class FirstPersonPickup : MonoBehaviour
     [SerializeField] private Transform holdPoint;
     [SerializeField] private float pickupDistance = 3f;
 
+    [Header("Holding")]
+    [SerializeField] private float followSpeed = 15f;   // how fast the item chases the hold point
+    [SerializeField] private float maxHoldDistance = 2f; // if the item gets stuck this far away, it drops
+
     private InputAction interactAction;
     private Rigidbody heldBody;
-    private Transform originalParent;
     private bool originalUseGravity;
-    private bool originalIsKinematic;
+    private RigidbodyConstraints originalConstraints;
+    private RigidbodyInterpolation originalInterpolation;
+    private CollisionDetectionMode originalCollisionMode;
+    private Collider[] heldColliders;
+    private Collider[] playerColliders;
     private ItemInspector inspector;
 
     private void Awake()
@@ -20,8 +27,9 @@ public class FirstPersonPickup : MonoBehaviour
             "Interact",
             InputActionType.Button,
             "<Keyboard>/e");
-        
+
         inspector = FindFirstObjectByType<ItemInspector>();
+        playerColliders = GetComponentsInChildren<Collider>();
     }
 
     private void OnEnable()
@@ -39,7 +47,6 @@ public class FirstPersonPickup : MonoBehaviour
     {
         if (interactAction.WasPressedThisFrame())
         {
-            
             if (heldBody == null)
             {
                 TryPickupObject();
@@ -49,6 +56,27 @@ public class FirstPersonPickup : MonoBehaviour
                 DropObject();
             }
         }
+    }
+
+    private void FixedUpdate()
+    {
+        if (heldBody == null)
+        {
+            return;
+        }
+
+        Vector3 toTarget = holdPoint.position - heldBody.position;
+
+        // Stuck behind a wall? Let go.
+        if (toTarget.magnitude > maxHoldDistance)
+        {
+            DropObject();
+            return;
+        }
+
+        // Move with physics so walls and floors can block it.
+        heldBody.linearVelocity = toTarget * followSpeed;
+        heldBody.angularVelocity = Vector3.zero;
     }
 
     private void TryPickupObject()
@@ -95,7 +123,6 @@ public class FirstPersonPickup : MonoBehaviour
 
         Debug.Log("Pickup check: Camera hit " + hit.collider.name);
 
-
         Rigidbody targetBody = hit.collider.attachedRigidbody;
 
         if (targetBody == null)
@@ -105,16 +132,22 @@ public class FirstPersonPickup : MonoBehaviour
         }
 
         heldBody = targetBody;
-        originalParent = heldBody.transform.parent;
+
+        // Remember the original settings so we can put them back.
         originalUseGravity = heldBody.useGravity;
-        originalIsKinematic = heldBody.isKinematic;
+        originalConstraints = heldBody.constraints;
+        originalInterpolation = heldBody.interpolation;
+        originalCollisionMode = heldBody.collisionDetectionMode;
 
-        heldBody.isKinematic = true;
+        // Stay a normal physics object (NOT kinematic) so it hits walls.
         heldBody.useGravity = false;
+        heldBody.constraints = RigidbodyConstraints.FreezeRotation;
+        heldBody.interpolation = RigidbodyInterpolation.Interpolate;
+        heldBody.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
 
-        heldBody.transform.SetParent(holdPoint, false);
-        heldBody.transform.localPosition = Vector3.zero;
-        heldBody.transform.localRotation = Quaternion.identity;
+        // The item should not bump into the player.
+        heldColliders = heldBody.GetComponentsInChildren<Collider>();
+        SetIgnorePlayerCollision(true);
 
         Debug.Log("Pickup check: Picked up " + heldBody.name);
 
@@ -124,7 +157,6 @@ public class FirstPersonPickup : MonoBehaviour
         }
     }
 
-
     private void DropObject()
     {
         if (heldBody == null)
@@ -132,9 +164,13 @@ public class FirstPersonPickup : MonoBehaviour
             return;
         }
 
-        heldBody.transform.SetParent(originalParent, true);
+        SetIgnorePlayerCollision(false);
+
+        heldBody.linearVelocity = Vector3.zero;
         heldBody.useGravity = originalUseGravity;
-        heldBody.isKinematic = originalIsKinematic;
+        heldBody.constraints = originalConstraints;
+        heldBody.interpolation = originalInterpolation;
+        heldBody.collisionDetectionMode = originalCollisionMode;
 
         if (inspector != null)
         {
@@ -142,6 +178,22 @@ public class FirstPersonPickup : MonoBehaviour
         }
 
         heldBody = null;
-        originalParent = null;
+        heldColliders = null;
+    }
+
+    private void SetIgnorePlayerCollision(bool ignore)
+    {
+        if (heldColliders == null)
+        {
+            return;
+        }
+
+        foreach (Collider held in heldColliders)
+        {
+            foreach (Collider playerCollider in playerColliders)
+            {
+                Physics.IgnoreCollision(held, playerCollider, ignore);
+            }
+        }
     }
 }
