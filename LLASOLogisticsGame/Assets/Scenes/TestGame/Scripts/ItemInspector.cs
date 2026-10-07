@@ -18,13 +18,11 @@ public class ItemInspector : MonoBehaviour
 
         if (heldItem != null)
         {
-            // Holding something: show it, but faded so it isn't annoying
             itemToShow = heldItem;
             alpha = 0.5f;
         }
         else
         {
-            // Not holding: check what the crosshair is looking at
             Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
             if (Physics.Raycast(ray, out RaycastHit hit, lookDistance))
             {
@@ -34,12 +32,23 @@ public class ItemInspector : MonoBehaviour
 
         if (itemToShow != null)
         {
-            infoText.text =
-                itemToShow.itemName + "\n" +
-                itemToShow.description + "\n" +
-                "Mass: " + itemToShow.massKg + " kg   " +
-                "Weight: " + itemToShow.weightN + " N   " +
-                "Volume: " + itemToShow.volumeL + " L";
+            ItemData d = InventoryDatabase.Instance.Get(itemToShow.itemId);
+
+            if (d != null)
+            {
+                float weight = d.mass * 1.62f; // Moon gravity. Use 9.81f for Earth.
+
+                infoText.text =
+                    d.itemName + "  (" + d.id + ")\n" +
+                    "Category: " + d.category + "\n" +
+                    "Mass: " + d.mass + " kg   Weight: " + weight.ToString("0.#") + " N   Volume: " + d.volume + " m3\n" +
+                    "Storage: " + d.storage + "   Temp: " + d.temperature + "\n" +
+                    "Zone: " + d.requiredZone + "   Access: " + d.access;
+            }
+            else
+            {
+                infoText.text = "Unknown item ID: " + itemToShow.itemId;
+            }
         }
 
         canvasGroup.alpha = itemToShow != null ? alpha : 0f;
