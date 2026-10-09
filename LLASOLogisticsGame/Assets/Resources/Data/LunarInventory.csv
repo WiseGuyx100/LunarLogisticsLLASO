@@ -1,4 +1,33 @@
-Id,Category,Name,Mass,Volume,Storage,Temperature,RequiredZone,Access
-EVA-01,EVA,Spacesuit,45,0.35,Rack,Ambient,EVA,High
-FOOD-01,Food,Meal Pack,2,0.01,Shelf,Cool,FOOD,Medium
-WATER-01,Water,Water Container,20,0.02,Floor,Ambient,WATER,High
+Id,Category,Name,Mass,Volume,Storage,Temperature,RequiredZone,Access,Qty,MissionDay,Fragility,Hazard,Container,PowerW
+FOOD-01,Food,Meal Pack (1 crew x 1 day),2.39,0.0062,Shelf,Cool,FOOD,High,48,1-14,Robust,None,3.0 CTB,0
+FOOD-02,Food,EVA-Day Meal Pack (1 crew x 1 day),2.94,0.0076,Shelf,Cool,FOOD,High,8,3;6;9;12,Robust,None,3.0 CTB,0
+FOOD-03,Food,Contingency Meal Pack (reserve),2.39,0.0062,Shelf,Cool,FOOD,Emergency,8,ALL,Robust,None,2.0 CTB,0
+WATER-01,Water,Water Container - Crew (CWC-I in M02 bag),25.64,0.0653,Floor,Ambient,WATER,High,9,1-14,Robust,None,M02 Bag (3 carriers),0
+WATER-02,Water,Water Container - EVA and System (CWC-I in M02 bag),25.64,0.0653,Floor,Ambient,WATER,Medium,17,3-12,Robust,None,M02 Bag (3 carriers),0
+GAS-01,Gas,Oxygen Tank - Crew (HPGC in M01 bag),94.13,0.2940,Floor,Ambient,GAS,High,2,1-14,Robust,Pressurized,M01 Bag,0
+GAS-02,Gas,Oxygen Tank - EVA and System (HPGC in M01 bag),94.13,0.2940,Floor,Ambient,GAS,Medium,3,3-12,Robust,Pressurized,M01 Bag,0
+GAS-03,Gas,Nitrogen Tank (HPGC in M01 bag),89.73,0.2940,Floor,Ambient,GAS,Medium,4,1-14,Robust,Pressurized,M01 Bag,0
+CREW-01,Crew,Clothing Set (1 crew for 14 days),5.70,0.0335,Shelf,Ambient,CREW,Medium,4,1,Robust,None,2.0 CTB,0
+CREW-02,Crew,Hygiene Kit and Wipes (1 crew for 14 days),5.20,0.0280,Shelf,Ambient,CREW,High,4,1,Robust,None,1.0 CTB,0
+CREW-03,Crew,Towel Set (1 crew for 14 days),1.35,0.0073,Shelf,Ambient,CREW,Medium,4,1,Robust,None,1.0 CTB,0
+CREW-04,Crew,Personal and Operational Supplies Kit (1 crew),7.50,0.0319,Shelf,Ambient,CREW,Medium,4,1,Fragile,None,2.0 CTB,0
+MED-01,Medical,Health-Care Consumables Kit (1 crew for 14 days),1.26,0.0068,Shelf,Cool,MEDICAL,High,4,1,Fragile,Medication,1.0 CTB,0
+WASTE-01,Waste,Waste and Trash Kit (1 crew for 14 days),4.20,0.0226,Shelf,Ambient,WASTE,High,4,1-14,Robust,Biohazard,2.0 CTB,0
+WASTE-02,Waste,Contingency Waste Collection Bags,0.34,0.0018,Shelf,Ambient,WASTE,Emergency,4,ALL,Robust,Biohazard,0.5 CTB,0
+EMER-01,Emergency,LiOH CO2 Scrubber Canister,1.75,0.0031,Shelf,Ambient,EMERGENCY,Emergency,8,ALL,Robust,Corrosive,2.0 CTB,0
+EVA-01,EVA,Spacesuit (xEMU-class),177.00,0.3178,Floor,Ambient,EVA,High,2,3,Fragile,Pressurized,Suit Rack,0
+EVA-02,EVA,EVA Consumables Pack (1 crew x 1 EVA),30.00,0.0539,Rack,Ambient,EVA,High,8,3;6;9;12,Robust,None,4.0 CTB,0
+EVA-03,EVA,Suit and Backpack Spares Kit,25.00,0.0449,Rack,Ambient,EVA,Medium,4,3;6;9;12,Fragile,None,2U Locker,0
+EVA-04,EVA,Dust Mitigation and Glove Spares Kit,10.00,0.0180,Rack,Ambient,EVA,Medium,4,3;6;9;12,Robust,None,2.0 CTB,0
+EVA-05,EVA,EVA Tool and Sample Bag Kit,5.00,0.0090,Rack,Ambient,EVA,Medium,4,3;6;9;12,Robust,Sharp,1U Locker,0
+MAINT-01,Maintenance,Life-Support and Habitat Spare Parts Kit,15.00,0.0269,Rack,Ambient,MAINT,Low,3,ANY,Fragile,None,2U Locker,0
+MAINT-02,Maintenance,Electrical Spares and Cable Kit,10.00,0.0180,Rack,Ambient,MAINT,Low,2,ANY,Robust,None,2U Locker,0
+MAINT-03,Maintenance,Hand Tool Kit,8.00,0.0144,Rack,Ambient,MAINT,Medium,2,ANY,Robust,Sharp,2U Locker,0
+MAINT-04,Maintenance,Fastener and Seal and Lubricant Kit,5.00,0.0090,Rack,Ambient,MAINT,Low,3,ANY,Robust,None,1U Locker,0
+POWER-01,Power,Spare Battery Pack,6.00,0.0108,Rack,Cool,MAINT,Medium,3,ANY,Robust,Flammable,1U Locker,0
+FAB-01,Fabrication,Fabrication Stock (3D-print filament and sheet),9.50,0.0171,Rack,Ambient,MAINT,Low,2,ANY,Robust,None,2U Locker,0
+SCI-01,Science,Science Instrument Case (sensors and cameras),12.00,0.0215,Locker,Ambient,SCIENCE,Medium,3,2,VeryFragile,None,1U Locker,0
+SCI-02,Science,Sample Containers and Collection Tools,6.00,0.0108,Locker,Ambient,SCIENCE,Medium,4,4;7;10,Fragile,None,1U Locker,0
+SCI-03,Science,Calibration and Test Equipment,8.00,0.0144,Locker,Ambient,SCIENCE,Low,2,2,VeryFragile,None,1U Locker,0
+SCI-04,Science,Cold Science Samples and Coolant Pack,9.00,0.0162,ColdLocker,Frozen,SCIENCE,Medium,2,6;12,Fragile,Biohazard,Cold Locker,0
+COLD-01,Cold,Powered Cold-Stowage Locker (Polar-class),30.00,0.0769,Rack,Ambient,SCIENCE,Medium,2,1,Robust,None,Rack Slot (Middeck size),75

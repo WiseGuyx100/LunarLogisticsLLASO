@@ -13,6 +13,14 @@ public class ItemData
     public string temperature;
     public string requiredZone;
     public string access;
+
+    // NEW columns
+    public int qty;
+    public string missionDay = "-";
+    public string fragility = "-";
+    public string hazard = "-";
+    public string container = "-";
+    public float powerW;
 }
 
 public class InventoryDatabase : MonoBehaviour
@@ -52,6 +60,17 @@ public class InventoryDatabase : MonoBehaviour
             d.temperature = c[6].Trim();
             d.requiredZone = c[7].Trim();
             d.access = c[8].Trim();
+
+            // The new columns. Only read them if the file has them.
+            if (c.Length >= 15)
+            {
+                int.TryParse(c[9].Trim(), out d.qty);
+                d.missionDay = c[10].Trim();
+                d.fragility = c[11].Trim();
+                d.hazard = c[12].Trim();
+                d.container = c[13].Trim();
+                float.TryParse(c[14].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out d.powerW);
+            }
 
             items[d.id] = d;
         }

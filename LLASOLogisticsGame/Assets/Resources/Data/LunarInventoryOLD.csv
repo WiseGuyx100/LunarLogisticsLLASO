@@ -1,0 +1,4 @@
+Id,Category,Name,Mass,Volume,Storage,Temperature,RequiredZone,Access
+EVA-01,EVA,Spacesuit,45,0.35,Rack,Ambient,EVA,High
+FOOD-01,Food,Meal Pack,2,0.01,Shelf,Cool,FOOD,Medium
+WATER-01,Water,Water Container,20,0.02,Floor,Ambient,WATER,High

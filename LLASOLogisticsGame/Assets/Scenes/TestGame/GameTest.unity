@@ -1576,8 +1576,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1298067754}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 68.17211, y: -0, z: 5.60365}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 68.17211, y: 0, z: 5.60365}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1684,14 +1684,14 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 28
+  m_fontSize: 24
   m_fontSizeBase: 28
   m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
+  m_enableAutoSizing: 1
+  m_fontSizeMin: 8
+  m_fontSizeMax: 24
   m_fontStyle: 0
-  m_HorizontalAlignment: 2
+  m_HorizontalAlignment: 1
   m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
@@ -1781,7 +1781,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 733fc6618b2bc7f47a5275ab80166a63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryDatabase
-  csvFile: {fileID: 4900000, guid: 60104a4705e80124faf706e82f5b14b6, type: 3}
+  csvFile: {fileID: 4900000, guid: eb52defa20f7bbf44b1f866ce9c85fba, type: 3}
 --- !u!1 &1395355896
 GameObject:
   m_ObjectHideFlags: 0
@@ -2799,9 +2799,9 @@ SceneRoots:
   - {fileID: 1530973305}
   - {fileID: 991428233}
   - {fileID: 1198110115}
-  - {fileID: 1298067755}
   - {fileID: 1928565671}
   - {fileID: 259889140}
   - {fileID: 1557892150}
   - {fileID: 1765333672}
   - {fileID: 1340624172}
+  - {fileID: 1298067755}
