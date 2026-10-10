@@ -20,6 +20,7 @@ public class FirstPersonPickup : MonoBehaviour
     private Collider[] heldColliders;
     private Collider[] playerColliders;
     private ItemInspector inspector;
+    private GridContainer grid;
 
     private void Awake()
     {
@@ -29,6 +30,7 @@ public class FirstPersonPickup : MonoBehaviour
             "<Keyboard>/e");
 
         inspector = FindFirstObjectByType<ItemInspector>();
+        grid = FindFirstObjectByType<GridContainer>();
         playerColliders = GetComponentsInChildren<Collider>();
     }
 
@@ -65,16 +67,37 @@ public class FirstPersonPickup : MonoBehaviour
             return;
         }
 
-        Vector3 toTarget = holdPoint.position - heldBody.position;
+        // Where your hands want the box to be
+        Vector3 targetPos = holdPoint.position;
 
         // Stuck behind a wall? Let go.
-        if (toTarget.magnitude > maxHoldDistance)
+        if ((targetPos - heldBody.position).magnitude > maxHoldDistance)
         {
             DropObject();
             return;
         }
 
+        // Inside the container? Then snap the target to the grid.
+        if (grid != null && grid.IsInside(targetPos))
+        {
+            // Straighten the box to the nearest 90 degrees
+            float y = Mathf.Round(heldBody.rotation.eulerAngles.y / 90f) * 90f;
+            heldBody.rotation = Quaternion.Euler(0f, y, 0f);
+            Physics.SyncTransforms();
+
+            // Measure how big the box is
+            Bounds b = heldColliders[0].bounds;
+            foreach (Collider c in heldColliders)
+            {
+                b.Encapsulate(c.bounds);
+            }
+
+            // Use the snapped spot instead of the hand spot
+            targetPos = grid.Snap(targetPos, b.size);
+        }
+
         // Move with physics so walls and floors can block it.
+        Vector3 toTarget = targetPos - heldBody.position;
         heldBody.linearVelocity = toTarget * followSpeed;
         heldBody.angularVelocity = Vector3.zero;
     }
@@ -165,6 +188,24 @@ public class FirstPersonPickup : MonoBehaviour
         }
 
         SetIgnorePlayerCollision(false);
+        // Snap to the grid if the box is inside the container
+        if (grid != null && grid.IsInside(heldBody.position))
+        {
+            // Straighten it to the nearest 90 degrees first
+            float y = Mathf.Round(heldBody.rotation.eulerAngles.y / 90f) * 90f;
+            heldBody.rotation = Quaternion.Euler(0f, y, 0f);
+            Physics.SyncTransforms();
+
+            // Measure how big the box is
+            Bounds b = heldColliders[0].bounds;
+            foreach (Collider c in heldColliders)
+            {
+                b.Encapsulate(c.bounds);
+            }
+
+            // Snap using the box size
+            heldBody.position = grid.Snap(heldBody.position, b.size);
+        }
 
         heldBody.linearVelocity = Vector3.zero;
         heldBody.useGravity = originalUseGravity;
