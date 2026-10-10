@@ -22,10 +22,12 @@ public class ItemInspector : MonoBehaviour
 
     // The box whose label is on the screen right now
     private ItemInfo shownItem;
+    private ScannerToggle scannerToggle;
 
     void Start()
     {
         canvasGroup.alpha = 0f;
+        scannerToggle = FindFirstObjectByType<ScannerToggle>();
 
         // Get a speaker for the beep (it makes one if there isn't one)
         audioSource = GetComponent<AudioSource>();
@@ -39,6 +41,14 @@ public class ItemInspector : MonoBehaviour
 
     void Update()
     {
+        // Scanner put away? Hide the panel and do nothing else.
+        if (scannerToggle != null && !scannerToggle.IsEquipped)
+        {
+            canvasGroup.alpha = 0f;
+            shownItem = null;
+            return;
+        }
+
         if (QWasPressed())
         {
             ItemInfo target = null;
