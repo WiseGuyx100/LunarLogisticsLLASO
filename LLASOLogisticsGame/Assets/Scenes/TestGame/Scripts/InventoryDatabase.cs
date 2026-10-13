@@ -14,13 +14,15 @@ public class ItemData
     public string requiredZone;
     public string access;
 
-    // NEW columns
     public int qty;
     public string missionDay = "-";
     public string fragility = "-";
     public string hazard = "-";
     public string container = "-";
     public float powerW;
+
+    // NEW: who handles this item. "-" means "not set in the CSV"
+    public string handler = "-";
 }
 
 public class InventoryDatabase : MonoBehaviour
@@ -61,7 +63,6 @@ public class InventoryDatabase : MonoBehaviour
             d.requiredZone = c[7].Trim();
             d.access = c[8].Trim();
 
-            // The new columns. Only read them if the file has them.
             if (c.Length >= 15)
             {
                 int.TryParse(c[9].Trim(), out d.qty);
@@ -72,6 +73,12 @@ public class InventoryDatabase : MonoBehaviour
                 float.TryParse(c[14].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out d.powerW);
             }
 
+            // NEW: optional 16th column = handler
+            if (c.Length >= 16 && c[15].Trim() != "")
+            {
+                d.handler = c[15].Trim();
+            }
+
             items[d.id] = d;
         }
     }
@@ -80,5 +87,11 @@ public class InventoryDatabase : MonoBehaviour
     {
         if (items.ContainsKey(id)) return items[id];
         return null;
+    }
+
+    // NEW: gives back every item in the file
+    public List<ItemData> GetAll()
+    {
+        return new List<ItemData>(items.Values);
     }
 }
