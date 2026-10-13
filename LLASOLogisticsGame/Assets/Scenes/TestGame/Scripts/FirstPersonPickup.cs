@@ -11,6 +11,10 @@ public class FirstPersonPickup : MonoBehaviour
     [SerializeField] private float followSpeed = 15f;   // how fast the item chases the hold point
     [SerializeField] private float maxHoldDistance = 2f; // if the item gets stuck this far away, it drops
 
+    [Header("Rotating")]
+    [SerializeField] private float rotateSpeed = 120f;   // degrees per second while a key is held
+    [SerializeField] private float settleSpeed = 360f;   // how fast it straightens inside the container
+
     private InputAction interactAction;
     private Rigidbody heldBody;
     private bool originalUseGravity;
@@ -21,6 +25,7 @@ public class FirstPersonPickup : MonoBehaviour
     private Collider[] playerColliders;
     private ItemInspector inspector;
     private GridContainer grid;
+    private bool isRotatingByKey;
 
     private void Awake()
     {
@@ -58,6 +63,11 @@ public class FirstPersonPickup : MonoBehaviour
                 DropObject();
             }
         }
+
+        if (heldBody != null)
+        {
+            HandleRotation();
+        }
     }
 
     private void FixedUpdate()
@@ -80,10 +90,15 @@ public class FirstPersonPickup : MonoBehaviour
         // Inside the container? Then snap the target to the grid.
         if (grid != null && grid.IsInside(targetPos))
         {
-            // Straighten the box to the nearest 90 degrees
-            float y = Mathf.Round(heldBody.rotation.eulerAngles.y / 90f) * 90f;
-            heldBody.rotation = Quaternion.Euler(0f, y, 0f);
-            Physics.SyncTransforms();
+            // Not turning right now? Ease the box straight.
+            if (!isRotatingByKey)
+            {
+                heldBody.rotation = Quaternion.RotateTowards(
+                    heldBody.rotation,
+                    SnapRotation(heldBody.rotation),
+                    settleSpeed * Time.fixedDeltaTime);
+                Physics.SyncTransforms();
+            }
 
             // Measure how big the box is
             Bounds b = heldColliders[0].bounds;
@@ -100,6 +115,66 @@ public class FirstPersonPickup : MonoBehaviour
         Vector3 toTarget = targetPos - heldBody.position;
         heldBody.linearVelocity = toTarget * followSpeed;
         heldBody.angularVelocity = Vector3.zero;
+    }
+
+    // Turns the held box while the arrow keys are held down
+    private void HandleRotation()
+    {
+        isRotatingByKey = false;
+
+        Keyboard kb = Keyboard.current;
+        if (kb == null)
+        {
+            return;
+        }
+
+        // Left / Right: turn the box
+        float turn = 0f;
+        if (kb.rightArrowKey.isPressed) turn += 1f;
+        if (kb.leftArrowKey.isPressed) turn -= 1f;
+
+        // Up / Down: tip the box
+        float tip = 0f;
+        if (kb.upArrowKey.isPressed) tip += 1f;
+        if (kb.downArrowKey.isPressed) tip -= 1f;
+
+        if (turn == 0f && tip == 0f)
+        {
+            return;
+        }
+
+        isRotatingByKey = true;
+
+        float step = rotateSpeed * Time.deltaTime;
+        Quaternion r = heldBody.rotation;
+        r = Quaternion.AngleAxis(turn * step, Vector3.up) * r;
+        r = Quaternion.AngleAxis(tip * step, GetTipAxis()) * r;
+
+        heldBody.rotation = r;
+        Physics.SyncTransforms();
+    }
+
+    // The side-to-side direction of your view, snapped to the world X or Z line
+    private Vector3 GetTipAxis()
+    {
+        Vector3 right = playerCamera.transform.right;
+        right.y = 0f;
+
+        if (Mathf.Abs(right.x) > Mathf.Abs(right.z))
+        {
+            return new Vector3(Mathf.Sign(right.x), 0f, 0f);
+        }
+        return new Vector3(0f, 0f, Mathf.Sign(right.z));
+    }
+
+    // Rounds a rotation to the nearest 90 degrees on every side
+    private Quaternion SnapRotation(Quaternion rotation)
+    {
+        Vector3 e = rotation.eulerAngles;
+        e.x = Mathf.Round(e.x / 90f) * 90f;
+        e.y = Mathf.Round(e.y / 90f) * 90f;
+        e.z = Mathf.Round(e.z / 90f) * 90f;
+        return Quaternion.Euler(e);
     }
 
     private void TryPickupObject()
@@ -155,6 +230,7 @@ public class FirstPersonPickup : MonoBehaviour
         }
 
         heldBody = targetBody;
+        isRotatingByKey = false;
 
         // Remember the original settings so we can put them back.
         originalUseGravity = heldBody.useGravity;
@@ -188,12 +264,12 @@ public class FirstPersonPickup : MonoBehaviour
         }
 
         SetIgnorePlayerCollision(false);
+
         // Snap to the grid if the box is inside the container
         if (grid != null && grid.IsInside(heldBody.position))
         {
             // Straighten it to the nearest 90 degrees first
-            float y = Mathf.Round(heldBody.rotation.eulerAngles.y / 90f) * 90f;
-            heldBody.rotation = Quaternion.Euler(0f, y, 0f);
+            heldBody.rotation = SnapRotation(heldBody.rotation);
             Physics.SyncTransforms();
 
             // Measure how big the box is
@@ -220,6 +296,7 @@ public class FirstPersonPickup : MonoBehaviour
 
         heldBody = null;
         heldColliders = null;
+        isRotatingByKey = false;
     }
 
     private void SetIgnorePlayerCollision(bool ignore)
