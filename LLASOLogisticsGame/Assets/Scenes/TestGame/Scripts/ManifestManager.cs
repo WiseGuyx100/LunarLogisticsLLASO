@@ -20,6 +20,7 @@ public class ManifestManager : MonoBehaviour
     void Start()
     {
         canvasGroup.alpha = 0f;
+        currentDay = totalDays;   // start on the last day, because it loads first
         Refresh();
     }
 
@@ -39,12 +40,14 @@ public class ManifestManager : MonoBehaviour
         if (!panelOpen) return;
 
         // [ goes back a day, ] goes forward a day
-        if (kb.leftBracketKey.wasPressedThisFrame)
+        // ] goes to the NEXT day to load (14, 13, 12 ... 1)
+        if (kb.rightBracketKey.wasPressedThisFrame)
         {
             currentDay = Mathf.Max(1, currentDay - 1);
             Refresh();
         }
-        if (kb.rightBracketKey.wasPressedThisFrame)
+        // [ goes back to the PREVIOUS day to load
+        if (kb.leftBracketKey.wasPressedThisFrame)
         {
             currentDay = Mathf.Min(totalDays, currentDay + 1);
             Refresh();
@@ -80,8 +83,9 @@ public class ManifestManager : MonoBehaviour
         int robotCount = 0;
 
         StringBuilder sb = new StringBuilder();
-        sb.AppendLine("<b>MISSION MANIFEST - DAY " + currentDay + " of " + totalDays + "</b>");
-        sb.AppendLine("Press [ and ] to change the day");
+        sb.AppendLine("<b>MISSION MANIFEST - LOAD STEP " + (totalDays - currentDay + 1) + " of " + totalDays + "</b>");
+        sb.AppendLine("<b>DAY " + currentDay + "</b>");
+        sb.AppendLine("Press ] for the next load day, [ to go back");
         sb.AppendLine();
 
         int shown = 0;
