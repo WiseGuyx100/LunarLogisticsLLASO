@@ -44,6 +44,38 @@ public class GridContainer : MonoBehaviour
         return transform.TransformPoint(p);
     }
 
+    // Turns a box's position into a name like "B3 - Level 1"
+    public string GetLocationLabel(Bounds worldBounds)
+    {
+        Vector3 lo = transform.InverseTransformPoint(worldBounds.min);
+        Vector3 hi = transform.InverseTransformPoint(worldBounds.max);
+
+        float halfW = containerSize.x / 2f;
+        float halfL = containerSize.z / 2f;
+        int cellsX = Mathf.Max(1, Mathf.FloorToInt(containerSize.x / cellSize));
+        int cellsZ = Mathf.Max(1, Mathf.FloorToInt(containerSize.z / cellSize));
+        float nudge = 0.02f; // keeps a box on a grid line from counting the next square
+
+        int x1 = Mathf.Clamp(Mathf.FloorToInt((Mathf.Min(lo.x, hi.x) + halfW + nudge) / cellSize), 0, cellsX - 1);
+        int x2 = Mathf.Clamp(Mathf.FloorToInt((Mathf.Max(lo.x, hi.x) + halfW - nudge) / cellSize), 0, cellsX - 1);
+        int z1 = Mathf.Clamp(Mathf.FloorToInt((Mathf.Min(lo.z, hi.z) + halfL + nudge) / cellSize), 0, cellsZ - 1);
+        int z2 = Mathf.Clamp(Mathf.FloorToInt((Mathf.Max(lo.z, hi.z) + halfL - nudge) / cellSize), 0, cellsZ - 1);
+
+        int level = Mathf.Max(1, Mathf.FloorToInt((Mathf.Min(lo.y, hi.y) + 0.05f) / cellSize) + 1);
+
+        string first = ColumnLetter(x1) + (z1 + 1);
+        string second = ColumnLetter(x2) + (z2 + 1);
+
+        string place = (x1 == x2 && z1 == z2) ? first : first + "-" + second;
+        return place + " - Level " + level;
+    }
+
+    string ColumnLetter(int index)
+    {
+        if (index < 26) return ((char)('A' + index)).ToString();
+        return "X" + index;
+    }
+    
     // Draws the grid in the Scene view
     void OnDrawGizmos()
     {

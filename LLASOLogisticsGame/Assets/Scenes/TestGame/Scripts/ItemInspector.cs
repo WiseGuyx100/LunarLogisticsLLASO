@@ -76,6 +76,14 @@ public class ItemInspector : MonoBehaviour
         }
     }
 
+    // Lets other scripts show a short message on the info panel
+    public void ShowMessage(string message)
+    {
+        infoText.text = message;
+        canvasGroup.alpha = 1f;
+        audioSource.PlayOneShot(scanSound, scanVolume);
+    }
+    
     void ShowLabel(ItemInfo item)
     {
         ItemData d = InventoryDatabase.Instance.Get(item.itemId);

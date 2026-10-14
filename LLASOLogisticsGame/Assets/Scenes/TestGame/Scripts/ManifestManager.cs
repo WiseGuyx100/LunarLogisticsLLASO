@@ -12,10 +12,16 @@ public class ManifestManager : MonoBehaviour
 
     [Header("Mission")]
     public int totalDays = 14;
-    public int currentDay = 1;
+    public int currentDay = 14;
     public int maxLines = 12;   // how many items to list before saying "+ more"
 
+    // The "apps" on the screen. Add more names here later.
+    private string[] appNames = { "MANIFEST", "TRACKER" };
+    private int appIndex = 0;
+
     private bool panelOpen = false;
+    private float refreshTimer = 0f;
+    private int selectedIndex = 0;
 
     void Start()
     {
@@ -29,7 +35,7 @@ public class ManifestManager : MonoBehaviour
         Keyboard kb = Keyboard.current;
         if (kb == null) return;
 
-        // M opens and closes the manifest
+        // M opens and closes the screen
         if (kb.mKey.wasPressedThisFrame)
         {
             panelOpen = !panelOpen;
@@ -39,18 +45,66 @@ public class ManifestManager : MonoBehaviour
 
         if (!panelOpen) return;
 
-        // [ goes back a day, ] goes forward a day
-        // ] goes to the NEXT day to load (14, 13, 12 ... 1)
-        if (kb.rightBracketKey.wasPressedThisFrame)
+        // Tab switches to the next app
+        if (kb.tabKey.wasPressedThisFrame)
         {
-            currentDay = Mathf.Max(1, currentDay - 1);
+            appIndex = (appIndex + 1) % appNames.Length;
             Refresh();
         }
-        // [ goes back to the PREVIOUS day to load
-        if (kb.leftBracketKey.wasPressedThisFrame)
+
+        // Day keys only work in the Manifest app
+        if (appIndex == 0)
         {
-            currentDay = Mathf.Min(totalDays, currentDay + 1);
-            Refresh();
+            // ] goes to the NEXT day to load (14, 13, 12 ... 1)
+            if (kb.rightBracketKey.wasPressedThisFrame)
+            {
+                currentDay = Mathf.Max(1, currentDay - 1);
+                Refresh();
+            }
+            // [ goes back to the PREVIOUS day to load
+            if (kb.leftBracketKey.wasPressedThisFrame)
+            {
+                currentDay = Mathf.Min(totalDays, currentDay + 1);
+                Refresh();
+            }
+        }
+
+        // Tracker app: pick an item and find it
+        if (appIndex == 1 && ItemTracker.Instance != null)
+        {
+            List<TrackedRecord> list = ItemTracker.Instance.GetRecords();
+            int count = list.Count;
+
+            if (count > 0)
+            {
+                // ] picks the next item, [ picks the one before
+                if (kb.rightBracketKey.wasPressedThisFrame)
+                {
+                    selectedIndex = (selectedIndex + 1) % count;
+                    Refresh();
+                }
+                if (kb.leftBracketKey.wasPressedThisFrame)
+                {
+                    selectedIndex = (selectedIndex - 1 + count) % count;
+                    Refresh();
+                }
+
+                // F turns the beam on or off for the picked item
+                if (kb.fKey.wasPressedThisFrame)
+                {
+                    selectedIndex = Mathf.Clamp(selectedIndex, 0, count - 1);
+                    ItemTracker.Instance.ToggleHighlight(list[selectedIndex].item);
+                    Refresh();
+                }
+            }
+
+            // The Tracker app updates itself twice a second
+            refreshTimer += Time.deltaTime;
+            if (refreshTimer >= 0.5f)
+            {
+                refreshTimer = 0f;
+                Refresh();
+            }
         }
     }
 
@@ -58,6 +112,35 @@ public class ManifestManager : MonoBehaviour
     {
         if (InventoryDatabase.Instance == null) return;
 
+        StringBuilder sb = new StringBuilder();
+
+        sb.AppendLine(BuildTabBar());
+        sb.AppendLine();
+
+        if (appIndex == 0) BuildManifestPage(sb);
+        else BuildTrackerPage(sb);
+
+        manifestText.text = sb.ToString();
+    }
+
+    // The row of app names at the top
+    string BuildTabBar()
+    {
+        StringBuilder bar = new StringBuilder();
+        for (int i = 0; i < appNames.Length; i++)
+        {
+            if (i == appIndex) bar.Append("<b>[ " + appNames[i] + " ]</b>");
+            else bar.Append(appNames[i]);
+
+            bar.Append("    ");
+        }
+        bar.Append("(Tab = switch app)");
+        return bar.ToString();
+    }
+
+    // ---------- APP 1: MANIFEST ----------
+    void BuildManifestPage(StringBuilder sb)
+    {
         // Sort items into "needed today" and "always on hand"
         List<ItemData> today = new List<ItemData>();
         int alwaysCount = 0;
@@ -77,12 +160,12 @@ public class ManifestManager : MonoBehaviour
         }
 
         today.Sort((a, b) => string.Compare(a.id, b.id));
+
         float totalMass = 0f;
         float totalVolume = 0f;
         int astronautCount = 0;
         int robotCount = 0;
 
-        StringBuilder sb = new StringBuilder();
         sb.AppendLine("<b>MISSION MANIFEST - LOAD STEP " + (totalDays - currentDay + 1) + " of " + totalDays + "</b>");
         sb.AppendLine("<b>DAY " + currentDay + "</b>");
         sb.AppendLine("Press ] for the next load day, [ to go back");
@@ -106,11 +189,7 @@ public class ManifestManager : MonoBehaviour
 
             if (shown < maxLines)
             {
-                string name = d.itemName;
-                if (name.Length > 30) name = name.Substring(0, 30) + "...";
-
-                sb.AppendLine(d.id + "  |  " + name);
-
+                sb.AppendLine(d.id + "  |  " + ShortName(d.itemName));
                 shown++;
             }
         }
@@ -131,8 +210,71 @@ public class ManifestManager : MonoBehaviour
             "   Volume: " + totalVolume.ToString("0.###") + " m3");
         sb.AppendLine("Astronaut: " + astronautCount + "   Robot: " + robotCount);
         sb.AppendLine("Always on hand (reserve / as needed): " + alwaysCount + " items");
+    }
 
-        manifestText.text = sb.ToString();
+    // ---------- APP 2: TRACKER ----------
+    void BuildTrackerPage(StringBuilder sb)
+    {
+        sb.AppendLine("<b>ITEM TRACKER</b>");
+
+        if (ItemTracker.Instance == null)
+        {
+            sb.AppendLine("Tracker is not set up in the scene.");
+            return;
+        }
+
+        List<TrackedRecord> list = ItemTracker.Instance.GetRecords();
+
+        sb.AppendLine("Items tracked: " + list.Count);
+        sb.AppendLine("Press ] and [ to pick an item, F to find it");
+        sb.AppendLine();
+
+        if (list.Count == 0)
+        {
+            sb.AppendLine("Nothing scanned yet.");
+            sb.AppendLine("Place a box in the cargo hold, take out the scanner,");
+            sb.AppendLine("aim at the box and press T.");
+            return;
+        }
+
+        selectedIndex = Mathf.Clamp(selectedIndex, 0, list.Count - 1);
+
+        // Scroll so the picked item is always on screen
+        int start = Mathf.Max(0, selectedIndex - maxLines + 1);
+        int end = Mathf.Min(list.Count, start + maxLines);
+
+        for (int i = start; i < end; i++)
+        {
+            TrackedRecord r = list[i];
+
+            string line = (i == selectedIndex ? "> " : "    ") +
+                r.id + "  |  " + ShortName(r.itemName) + "  |  " + r.location;
+
+            // Box was moved after it was scanned?
+            if (ItemTracker.Instance.CurrentLocation(r) != r.location)
+            {
+                line += "  (MOVED - rescan)";
+            }
+
+            // Beam is pointing at this one?
+            if (ItemTracker.Instance.Highlighted == r.item)
+            {
+                line += "  (FINDING)";
+            }
+
+            sb.AppendLine(line);
+        }
+
+        if (end < list.Count)
+        {
+            sb.AppendLine("+ " + (list.Count - end) + " more below");
+        }
+    }
+
+    string ShortName(string name)
+    {
+        if (name.Length > 45) return name.Substring(0, 45) + "...";
+        return name;
     }
 
     // "ALL" or "ANY" means the item is not tied to one day
@@ -176,15 +318,12 @@ public class ManifestManager : MonoBehaviour
     {
         if (d.handler != "-") return d.handler;
 
-        // Fragile things need a careful human
         string f = d.fragility.ToLower();
         if (f == "fragile" || f == "veryfragile") return "Astronaut";
 
-        // Medical and biohazard items need human judgment
         string h = d.hazard.ToLower();
         if (h == "medication" || h == "biohazard") return "Astronaut";
 
-        // Everything else can be moved by a robot
         return "Robot";
     }
 }
