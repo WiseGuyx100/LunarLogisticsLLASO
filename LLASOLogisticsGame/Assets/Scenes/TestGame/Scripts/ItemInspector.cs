@@ -137,10 +137,6 @@ public class ItemInspector : MonoBehaviour
 
     bool QWasPressed()
     {
-#if ENABLE_INPUT_SYSTEM
-        return Keyboard.current != null && Keyboard.current.qKey.wasPressedThisFrame;
-#else
-        return Input.GetKeyDown(KeyCode.Q);
-#endif
+        return GameControls.ScanInfoPressed();
     }
 }

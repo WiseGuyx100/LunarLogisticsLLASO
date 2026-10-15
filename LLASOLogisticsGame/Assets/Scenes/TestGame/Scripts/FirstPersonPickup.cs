@@ -33,6 +33,7 @@ public class FirstPersonPickup : MonoBehaviour
             "Interact",
             InputActionType.Button,
             "<Keyboard>/e");
+            interactAction.AddBinding("<Gamepad>/buttonEast");
 
         inspector = FindFirstObjectByType<ItemInspector>();
         grid = FindFirstObjectByType<GridContainer>();
@@ -122,21 +123,15 @@ public class FirstPersonPickup : MonoBehaviour
     {
         isRotatingByKey = false;
 
-        Keyboard kb = Keyboard.current;
-        if (kb == null)
-        {
-            return;
-        }
-
         // Left / Right: turn the box
         float turn = 0f;
-        if (kb.rightArrowKey.isPressed) turn += 1f;
-        if (kb.leftArrowKey.isPressed) turn -= 1f;
+        if (GameControls.TurnRightHeld()) turn += 1f;
+        if (GameControls.TurnLeftHeld()) turn -= 1f;
 
         // Up / Down: tip the box
         float tip = 0f;
-        if (kb.upArrowKey.isPressed) tip += 1f;
-        if (kb.downArrowKey.isPressed) tip -= 1f;
+        if (GameControls.TipUpHeld()) tip += 1f;
+        if (GameControls.TipDownHeld()) tip -= 1f;
 
         if (turn == 0f && tip == 0f)
         {

@@ -32,11 +32,8 @@ public class ManifestManager : MonoBehaviour
 
     void Update()
     {
-        Keyboard kb = Keyboard.current;
-        if (kb == null) return;
-
-        // M opens and closes the screen
-        if (kb.mKey.wasPressedThisFrame)
+        // M or + opens and closes the screen
+        if (GameControls.ManifestPressed())
         {
             panelOpen = !panelOpen;
             canvasGroup.alpha = panelOpen ? 1f : 0f;
@@ -45,24 +42,24 @@ public class ManifestManager : MonoBehaviour
 
         if (!panelOpen) return;
 
-        // Tab switches to the next app
-        if (kb.tabKey.wasPressedThisFrame)
+        // Tab or - switches to the next app
+        if (GameControls.SwitchAppPressed())
         {
             appIndex = (appIndex + 1) % appNames.Length;
             Refresh();
         }
 
-        // Day keys only work in the Manifest app
+        // Manifest app: change the day
         if (appIndex == 0)
         {
-            // ] goes to the NEXT day to load (14, 13, 12 ... 1)
-            if (kb.rightBracketKey.wasPressedThisFrame)
+            // ] or R goes to the NEXT day to load (14, 13, 12 ... 1)
+            if (GameControls.NextPressed())
             {
                 currentDay = Mathf.Max(1, currentDay - 1);
                 Refresh();
             }
-            // [ goes back to the PREVIOUS day to load
-            if (kb.leftBracketKey.wasPressedThisFrame)
+            // [ or L goes back to the PREVIOUS day to load
+            if (GameControls.PreviousPressed())
             {
                 currentDay = Mathf.Min(totalDays, currentDay + 1);
                 Refresh();
@@ -77,20 +74,19 @@ public class ManifestManager : MonoBehaviour
 
             if (count > 0)
             {
-                // ] picks the next item, [ picks the one before
-                if (kb.rightBracketKey.wasPressedThisFrame)
+                if (GameControls.NextPressed())
                 {
                     selectedIndex = (selectedIndex + 1) % count;
                     Refresh();
                 }
-                if (kb.leftBracketKey.wasPressedThisFrame)
+                if (GameControls.PreviousPressed())
                 {
                     selectedIndex = (selectedIndex - 1 + count) % count;
                     Refresh();
                 }
 
-                // F turns the beam on or off for the picked item
-                if (kb.fKey.wasPressedThisFrame)
+                // F or Y turns the beam on or off for the picked item
+                if (GameControls.FindPressed())
                 {
                     selectedIndex = Mathf.Clamp(selectedIndex, 0, count - 1);
                     ItemTracker.Instance.ToggleHighlight(list[selectedIndex].item);

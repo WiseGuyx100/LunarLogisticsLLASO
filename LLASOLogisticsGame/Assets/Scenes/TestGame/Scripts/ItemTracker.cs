@@ -49,8 +49,7 @@ public class ItemTracker : MonoBehaviour
 
     void Update()
     {
-        Keyboard kb = Keyboard.current;
-        if (kb == null || !kb.tKey.wasPressedThisFrame) return;
+        if (!GameControls.StoreLocationPressed()) return;
 
         // Scanner has to be out
         if (scannerToggle != null && !scannerToggle.IsEquipped) return;

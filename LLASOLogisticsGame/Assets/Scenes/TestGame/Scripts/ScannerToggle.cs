@@ -25,6 +25,7 @@ public class ScannerToggle : MonoBehaviour
             "ToggleScanner",
             InputActionType.Button,
             "<Keyboard>/1");
+            toggleAction.AddBinding("<Gamepad>/buttonNorth");
     }
 
     void OnEnable()
