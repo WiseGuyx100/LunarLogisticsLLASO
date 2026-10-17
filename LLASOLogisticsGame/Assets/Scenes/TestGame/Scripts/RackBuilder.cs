@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEngine;
 
 public class RackBuilder : MonoBehaviour
@@ -11,25 +12,32 @@ public class RackBuilder : MonoBehaviour
         public string boxId;
         public string zone;
         public int day;            // 0 = emergency, 15 = any day
+        public int units;          // how many items are packed in this box
         public int shelfLevel;     // 0 = bottom
         public Vector3 position;   // inside the CargoGrid object
         public Quaternion rotation = Quaternion.identity;
-        public Vector3 size;
+        public Vector3 size;       // along shelf, height, depth (meters)
     }
 
-    [Header("Your grid container (leave empty and it finds it)")]
+    [Header("Grid container (leave empty and it finds it)")]
     public GridContainer grid;
 
+    [Header("Mode")]
+    public bool condensed = true;          // ON = items grouped into CTBs (fewer boxes)
+    public float packEfficiency = 0.7f;    // how full a CTB gets (by volume)
+    public bool fillUsesPrefabs = false;   // fill tool: real prefabs instead of colored blocks
+
     [Header("Door")]
-    public DoorPosition door = DoorPosition.EndMinusZ;
+    public DoorPosition door = DoorPosition.WallPlusX;
     public float doorWidth = 1.3f;
     public float doorCenter = 0f;       // only for a door on a long wall (0 = middle)
-    public float doorClearance = 0.15f; // empty space kept next to an end door
+    public float doorClearance = 0.15f; // only for a door at an end
 
     [Header("Racks")]
-    public float rackDepth = 0.55f;     // meters. Auto-shrinks if the aisle would be narrower than the door
-    public bool doubleDeep = true;      // small boxes sit two deep (back row first)
-    public int maxLevels = 6;           // shelves per rack (player reach)
+    public float rackDepth = 0.70f;     // max depth. Auto-capped so the aisle stays at least Min Aisle
+    public float minAisle = 0.95f;      // 3 ft = 0.914 m, plus a little extra
+    public bool doubleDeep = true;
+    public int maxLevels = 6;
     public bool buildFlatFloor = true;
     public float floorY = 0f;
     public bool showZoneSigns = true;
@@ -39,9 +47,9 @@ public class RackBuilder : MonoBehaviour
     public float signSize = 0.008f;
     public float boxGap = 0.03f;
     public float wallGap = 0.005f;
-    public float sideInset = 0.08f;   // pulls racks away from the long walls
-    public float endInset = 0.15f;    // keeps racks away from the container ends
     public float topGap = 0.15f;
+    public float sideInset = 0.08f;
+    public float endInset = 0.15f;
 
     [Header("Answer key (filled in when you build)")]
     public List<SlotInfo> slots = new List<SlotInfo>();
@@ -52,13 +60,39 @@ public class RackBuilder : MonoBehaviour
     const string rootName = "Racks (built)";
     const string testName = "Test Boxes (side tool)";
 
-    static readonly string[] zoneOrder =
+    // Container sizes in cm. CTB sizes are from the NASA table (L, W, H).
+    // Items marked upright are already (along shelf, height, depth).
+    class Spec
     {
-        "EMERGENCY", "FOOD", "MEDICAL", "WATER", "CREW", "WASTE",
-        "SCIENCE", "EVA", "EVA TALL", "MAINT", "GAS TALL"
+        public float a, b, c, volume, mass;
+        public int fixedPer;
+        public bool upright;
+        public Spec(float a, float b, float c, float volume, float mass, int fixedPer, bool upright)
+        {
+            this.a = a; this.b = b; this.c = c;
+            this.volume = volume; this.mass = mass;
+            this.fixedPer = fixedPer; this.upright = upright;
+        }
+    }
+
+    static readonly Dictionary<string, Spec> specs = new Dictionary<string, Spec>
+    {
+        { "0.5 CTB",   new Spec(42.5f, 24.8f, 23.5f, 0.025f, 7.3f, 0, false) },
+        { "1.0 CTB",   new Spec(50.2f, 42.5f, 24.8f, 0.053f, 15.4f, 0, false) },
+        { "1U Locker", new Spec(50.2f, 42.5f, 24.8f, 0.053f, 15.4f, 0, false) },
+        { "2.0 CTB",   new Spec(50.2f, 42.5f, 50.2f, 0.107f, 31.0f, 0, false) },
+        { "2U Locker", new Spec(50.2f, 42.5f, 50.2f, 0.107f, 31.0f, 0, false) },
+        { "3.0 CTB",   new Spec(74.9f, 42.5f, 50.2f, 0.160f, 46.4f, 0, false) },
+        { "4.0 CTB",   new Spec(89.7f, 50.8f, 53.3f, 0.243f, 70.5f, 0, false) },
+        { "6.0 CTB",   new Spec(89.7f, 81.9f, 53.3f, 0.392f, 113.7f, 0, false) },
+        { "M01 Bag",   new Spec(55f, 124f, 55f, 0f, 0f, 1, true) },
+        { "M02 Bag (3 carriers)", new Spec(75f, 50f, 52f, 0f, 0f, 3, true) },
+        { "Suit Rack", new Spec(60f, 110f, 48f, 0f, 0f, 1, true) },
+        { "Cold Locker", new Spec(51.6f, 27.4f, 54.4f, 0f, 0f, 1, true) },
+        { "Rack Slot (Middeck size)", new Spec(51.6f, 27.4f, 54.4f, 0f, 0f, 1, true) },
     };
 
-    // Sizes in meters (width, height, depth). Only used if a box prefab is not found.
+    // Sizes in meters (along, height, depth). Used when Condensed is OFF and no prefab is found.
     static readonly Dictionary<string, Vector3> fallbackSizes = new Dictionary<string, Vector3>
     {
         { "FOOD-01",  new Vector3(0.30f, 0.103f, 0.20f) },
@@ -99,7 +133,8 @@ public class RackBuilder : MonoBehaviour
     {
         public string id;
         public string zone;
-        public Vector3 size;
+        public Vector3 size;     // along shelf, height, depth
+        public int units;
         public int day;
         public int order;
     }
@@ -129,6 +164,8 @@ public class RackBuilder : MonoBehaviour
     {
         grid = FindGrid();
     }
+
+    // hide the red door marker while playing
     void Awake()
     {
         if (grid == null) grid = FindGrid();
@@ -137,41 +174,6 @@ public class RackBuilder : MonoBehaviour
         if (m != null) m.gameObject.SetActive(false);
     }
 
-    void BuildDoorMarker(Transform parent)
-    {
-        Vector3 cs = grid.containerSize;
-        GameObject marker = new GameObject("Door Marker");
-        marker.transform.SetParent(parent, false);
-        Material red = MakeMat(Color.red);
-
-        Vector3 stripPos;
-        Vector3 stripSize;
-        Vector3 poleA;
-        Vector3 poleB;
-
-        if (DoorAtEnd())
-        {
-            float zEnd = (door == DoorPosition.EndMinusZ ? -1f : 1f) * (cs.z / 2f - 0.03f);
-            stripPos = new Vector3(0f, floorY + 0.025f, zEnd);
-            stripSize = new Vector3(doorWidth, 0.05f, 0.6f);
-            poleA = new Vector3(-doorWidth / 2f, floorY + 1.05f, zEnd);
-            poleB = new Vector3(doorWidth / 2f, floorY + 1.05f, zEnd);
-        }
-        else
-        {
-            float xWall = (door == DoorPosition.WallPlusX ? 1f : -1f) * (cs.x / 2f - 0.03f);
-            stripPos = new Vector3(xWall, floorY + 0.025f, doorCenter);
-            stripSize = new Vector3(0.6f, 0.05f, doorWidth);
-            poleA = new Vector3(xWall, floorY + 1.05f, doorCenter - doorWidth / 2f);
-            poleB = new Vector3(xWall, floorY + 1.05f, doorCenter + doorWidth / 2f);
-        }
-
-        GameObject[] parts = new GameObject[3];
-        parts[0] = Cube("Door Strip", marker.transform, stripPos, stripSize, red);
-        parts[1] = Cube("Door Pole A", marker.transform, poleA, new Vector3(0.06f, 2.1f, 0.06f), red);
-        parts[2] = Cube("Door Pole B", marker.transform, poleB, new Vector3(0.06f, 2.1f, 0.06f), red);
-        foreach (GameObject part in parts) DestroyNow(part.GetComponent<Collider>());
-    }
     GridContainer FindGrid()
     {
         GridContainer g = GetComponent<GridContainer>();
@@ -186,7 +188,8 @@ public class RackBuilder : MonoBehaviour
 
     float RackDepth()
     {
-        float d = rackDepth;
+        // racks on both walls plus the side insets must leave at least minAisle
+        float d = Mathf.Min(rackDepth, (grid.containerSize.x - minAisle) / 2f - sideInset);
         if (DoorAtEnd())
         {
             d = Mathf.Min(d, (grid.containerSize.x - doorWidth - 0.04f) / 2f);
@@ -194,7 +197,6 @@ public class RackBuilder : MonoBehaviour
         return d;
     }
 
-    // Draws the door (red) and the aisle (yellow) in the Scene view
     void OnDrawGizmos()
     {
         if (grid == null) return;
@@ -214,7 +216,7 @@ public class RackBuilder : MonoBehaviour
 
         Gizmos.color = Color.yellow;
         float d = RackDepth();
-        Gizmos.DrawWireCube(new Vector3(0f, floorY + 0.02f, 0f), new Vector3(s.x - 2f * d, 0.04f, s.z));
+        Gizmos.DrawWireCube(new Vector3(0f, floorY + 0.02f, 0f), new Vector3(s.x - 2f * (d + sideInset), 0.04f, s.z));
     }
 
     // ------------------------------------------------------------------
@@ -244,12 +246,18 @@ public class RackBuilder : MonoBehaviour
 
         Vector3 cs = grid.containerSize;
         float depth = RackDepth();
-        Debug.Log("RackBuilder: rack depth " + depth.ToString("F2") + " m, aisle " + (cs.x - 2f * depth).ToString("F2") + " m.");
+        float aisle = cs.x - 2f * (depth + sideInset);
+        Debug.Log("RackBuilder: rack depth " + depth.ToString("F2") + " m, aisle " + aisle.ToString("F2") + " m (" + (aisle / 0.3048f).ToString("F1") + " ft). Needs 3 ft.");
+        if (aisle < 0.914f) Debug.LogWarning("RackBuilder: the aisle is narrower than 3 ft!");
 
-        // ---- 1. read the spreadsheet: one entry for every single box ----
+        float depthLimit = depth - wallGap;
+
+        // ---- 1. read the spreadsheet ----
         Dictionary<string, ZonePlan> plans = new Dictionary<string, ZonePlan>();
         string[] lines = csv.text.Split('\n');
         int order = 0;
+        int itemTotal = 0;
+        int boxTotal = 0;
 
         for (int i = 1; i < lines.Length; i++)
         {
@@ -257,28 +265,45 @@ public class RackBuilder : MonoBehaviour
             if (line == "") continue;
 
             string[] c = line.Split(',');
-            if (c.Length < 11) continue;
+            if (c.Length < 14) continue;
 
             string id = c[0].Trim();
             string zone = c[7].Trim();
             string missionDay = c[10].Trim();
+            string container = c[13].Trim();
 
             int qty;
             if (!int.TryParse(c[9].Trim(), out qty)) continue;
 
-            Vector3 size;
-            GameObject prefab = Resources.Load<GameObject>("CargoBoxes/" + id);
-            MeshFilter mf = null;
-            if (prefab != null) mf = prefab.GetComponent<MeshFilter>();
+            float itemMass;
+            float itemVol;
+            float.TryParse(c[3].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out itemMass);
+            float.TryParse(c[4].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out itemVol);
 
-            if (mf != null && mf.sharedMesh != null)
+            Vector3 size;
+            int per = 1;
+            Spec spec;
+
+            if (condensed && specs.TryGetValue(container, out spec))
             {
-                size = Vector3.Scale(mf.sharedMesh.bounds.size, prefab.transform.localScale);
+                size = OrientBox(spec, depthLimit);
+                per = UnitsPerBox(spec, itemVol, itemMass);
             }
-            else if (!fallbackSizes.TryGetValue(id, out size))
+            else
             {
-                Debug.LogWarning("RackBuilder: no size for " + id + " - skipped.");
-                continue;
+                GameObject prefab = Resources.Load<GameObject>("CargoBoxes/" + id);
+                MeshFilter mf = null;
+                if (prefab != null) mf = prefab.GetComponent<MeshFilter>();
+
+                if (mf != null && mf.sharedMesh != null)
+                {
+                    size = Vector3.Scale(mf.sharedMesh.bounds.size, prefab.transform.localScale);
+                }
+                else if (!fallbackSizes.TryGetValue(id, out size))
+                {
+                    Debug.LogWarning("RackBuilder: no size for " + id + " - skipped.");
+                    continue;
+                }
             }
 
             string planKey = zone;
@@ -291,28 +316,31 @@ public class RackBuilder : MonoBehaviour
                 plans[planKey] = np;
             }
 
-            for (int k = 0; k < qty; k++)
+            int boxes = Mathf.CeilToInt((float)qty / per);
+            for (int j = 0; j < boxes; j++)
             {
                 BoxUnit u = new BoxUnit();
                 u.id = id;
                 u.zone = zone;
                 u.size = size;
-                u.day = DayForUnit(missionDay, k, qty);
+                u.units = Mathf.Min(per, qty - j * per);
+                u.day = DayForUnit(missionDay, j * per, qty);
                 u.order = order;
                 order++;
                 plans[planKey].units.Add(u);
             }
+            itemTotal += qty;
+            boxTotal += boxes;
         }
 
         // ---- 2. plan the shelves of every zone ----
         float topLimit = cs.y - topGap;
-        foreach (ZonePlan p in plans.Values) PlanZone(p, topLimit, depth);
+        foreach (ZonePlan zp in plans.Values) PlanZone(zp, topLimit, depth);
 
         // ---- 3. decide which wall each zone goes on ----
         List<WallRun> runs = MakeRuns();
 
-        // biggest racks first, emergency by the door.
-        // A rack that fits nowhere is split in two (earlier days stay nearer the door).
+        // emergency by the door, then biggest racks first. A rack that fits nowhere is split in two.
         List<ZonePlan> queue = new List<ZonePlan>(plans.Values);
         queue.Sort((x, y) => y.length.CompareTo(x.length));
         List<ZonePlan> placed = new List<ZonePlan>();
@@ -327,19 +355,19 @@ public class RackBuilder : MonoBehaviour
         while (queue.Count > 0 && guard < 200)
         {
             guard++;
-            ZonePlan p = queue[0];
+            ZonePlan cur = queue[0];
             queue.RemoveAt(0);
 
-            WallRun r = FindRun(p, runs);
-            if (r == null && p.units.Count >= 2)
+            WallRun target = FindRun(cur, runs);
+            if (target == null && cur.units.Count >= 2)
             {
-                int half = p.units.Count / 2;
+                int half = cur.units.Count / 2;
                 ZonePlan first = new ZonePlan();
                 ZonePlan second = new ZonePlan();
-                first.key = p.key;
-                second.key = p.key;
-                first.units.AddRange(p.units.GetRange(0, half));
-                second.units.AddRange(p.units.GetRange(half, p.units.Count - half));
+                first.key = cur.key;
+                second.key = cur.key;
+                first.units.AddRange(cur.units.GetRange(0, half));
+                second.units.AddRange(cur.units.GetRange(half, cur.units.Count - half));
                 PlanZone(first, topLimit, depth);
                 PlanZone(second, topLimit, depth);
                 queue.Insert(0, second);
@@ -347,20 +375,20 @@ public class RackBuilder : MonoBehaviour
                 continue;
             }
 
-            if (r == null)
+            if (target == null)
             {
-                r = runs[0];
+                target = runs[0];
                 foreach (WallRun other in runs)
                 {
-                    if (other.length - other.used > r.length - r.used) r = other;
+                    if (other.length - other.used > target.length - target.used) target = other;
                 }
-                Debug.LogWarning("RackBuilder: " + p.key + " does not fit anywhere. Not enough wall space.");
+                Debug.LogWarning("RackBuilder: " + cur.key + " does not fit anywhere. Not enough wall space.");
             }
 
-            p.run = r;
-            p.start = r.used;
-            r.used += p.length + 0.06f;
-            placed.Add(p);
+            cur.run = target;
+            cur.start = target.used;
+            target.used += cur.length + 0.06f;
+            placed.Add(cur);
         }
 
         // ---- 4. build ----
@@ -374,6 +402,7 @@ public class RackBuilder : MonoBehaviour
         shelfMat = MakeMat(new Color(0.60f, 0.63f, 0.68f));
         postMat = MakeMat(new Color(0.20f, 0.22f, 0.26f));
         BuildDoorMarker(root.transform);
+
         if (buildFlatFloor)
         {
             Cube("Floor", root.transform, new Vector3(0f, floorY - 0.025f, 0f),
@@ -381,19 +410,19 @@ public class RackBuilder : MonoBehaviour
         }
 
         int slotCount = 0;
-        foreach (ZonePlan p in placed)
+        foreach (ZonePlan built in placed)
         {
-            BuildRack(p, depth, shelvesRoot.transform);
-            slotCount += PlaceSlots(p, depth, slotsRoot.transform);
+            BuildRack(built, depth, shelvesRoot.transform);
+            slotCount += PlaceSlots(built, depth, slotsRoot.transform);
         }
 
-        foreach (WallRun r in runs)
+        foreach (WallRun rr in runs)
         {
-            float usedLen = Mathf.Max(0f, r.used - 0.06f);
-            Debug.Log("RackBuilder: wall run uses " + usedLen.ToString("F2") + " m of " + r.length.ToString("F2") + " m.");
-            if (usedLen > r.length + 0.01f)
+            float usedLen = Mathf.Max(0f, rr.used - 0.06f);
+            Debug.Log("RackBuilder: wall run uses " + usedLen.ToString("F2") + " m of " + rr.length.ToString("F2") + " m.");
+            if (usedLen > rr.length + 0.01f)
             {
-                Debug.LogWarning("RackBuilder: a wall is too full by " + (usedLen - r.length).ToString("F2") + " m.");
+                Debug.LogWarning("RackBuilder: a wall is too full by " + (usedLen - rr.length).ToString("F2") + " m.");
             }
         }
 
@@ -403,7 +432,7 @@ public class RackBuilder : MonoBehaviour
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(gameObject.scene);
 #endif
 
-        Debug.Log("RackBuilder: built the racks and " + slotCount + " slots.");
+        Debug.Log("RackBuilder: built the racks and " + slotCount + " slots for " + itemTotal + " items (" + (condensed ? "condensed" : "one box per item") + ").");
     }
 
     [ContextMenu("2. Remove racks and slots")]
@@ -422,7 +451,6 @@ public class RackBuilder : MonoBehaviour
     }
 
     // SIDE TOOL: puts every box into its slot. Only works while the game is playing.
-    [ContextMenu("3. Side tool: fill every slot with its box (Play mode only)")]
     [ContextMenu("3. Side tool: fill every slot with its box (Play mode only)")]
     public void FillWithBoxes()
     {
@@ -453,16 +481,20 @@ public class RackBuilder : MonoBehaviour
             Vector3 pos = grid.transform.TransformPoint(s.position);
             Quaternion rot = grid.transform.rotation * s.rotation;
 
-            GameObject prefab = Resources.Load<GameObject>("CargoBoxes/" + s.boxId);
-            GameObject box;
-            if (prefab != null)
+            GameObject box = null;
+            if (fillUsesPrefabs)
             {
-                box = Instantiate(prefab, pos, rot, holder.transform);
-                real++;
+                GameObject prefab = Resources.Load<GameObject>("CargoBoxes/" + s.boxId);
+                if (prefab != null)
+                {
+                    box = Instantiate(prefab, pos, rot, holder.transform);
+                    real++;
+                }
             }
-            else
+
+            if (box == null)
             {
-                // no prefab found: a colored block of the right size stands in
+                // a colored block of the right size stands in
                 box = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 box.transform.SetParent(holder.transform, false);
                 box.transform.position = pos;
@@ -471,7 +503,7 @@ public class RackBuilder : MonoBehaviour
                 box.GetComponent<Renderer>().sharedMaterial = PadMaterial(s.zone);
                 placeholders++;
             }
-            box.name = s.boxId;
+            box.name = s.boxId + " x" + s.units;
 
             Rigidbody rb = box.GetComponent<Rigidbody>();
             if (rb != null) rb.Sleep();
@@ -495,6 +527,50 @@ public class RackBuilder : MonoBehaviour
     }
 
     // ------------------------------------------------------------------
+    //  Box sizes
+    // ------------------------------------------------------------------
+
+    // Returns (along shelf, height, depth) in meters.
+    // The side that fits the rack depth best faces the aisle, the shortest remaining side points up.
+    static Vector3 OrientBox(Spec s, float depthLimit)
+    {
+        if (s.upright) return new Vector3(s.a / 100f, s.b / 100f, s.c / 100f);
+
+        float[] d = { s.a / 100f, s.b / 100f, s.c / 100f };
+        System.Array.Sort(d);   // smallest first
+
+        int depthIndex = 0;
+        for (int i = 2; i >= 0; i--)
+        {
+            if (d[i] <= depthLimit)
+            {
+                depthIndex = i;
+                break;
+            }
+        }
+
+        List<float> rest = new List<float>();
+        for (int i = 0; i < 3; i++)
+        {
+            if (i != depthIndex) rest.Add(d[i]);
+        }
+
+        float along = Mathf.Max(rest[0], rest[1]);
+        float height = Mathf.Min(rest[0], rest[1]);
+        return new Vector3(along, height, d[depthIndex]);
+    }
+
+    // How many items fit in one box: limited by volume (at packEfficiency) and by loaded mass
+    int UnitsPerBox(Spec s, float itemVol, float itemMass)
+    {
+        if (s.fixedPer > 0) return s.fixedPer;
+
+        float byVol = itemVol > 0f ? s.volume * packEfficiency / itemVol : 999f;
+        float byMass = itemMass > 0f ? s.mass / itemMass : 999f;
+        return Mathf.Max(1, Mathf.FloorToInt(Mathf.Min(byVol, byMass)));
+    }
+
+    // ------------------------------------------------------------------
     //  Layout
     // ------------------------------------------------------------------
 
@@ -514,7 +590,7 @@ public class RackBuilder : MonoBehaviour
                 r.startZ = endSign * halfL;
                 r.dir = -endSign;
                 r.used = doorClearance;
-                r.length = grid.containerSize.z - 0.03f;
+                r.length = grid.containerSize.z - endInset;
                 list.Add(r);
             }
         }
@@ -526,7 +602,6 @@ public class RackBuilder : MonoBehaviour
             {
                 float dir = (d == 0) ? 1f : -1f;
 
-                // door wall: starts beside the door
                 WallRun a = new WallRun();
                 a.wallSign = doorSign;
                 a.startZ = doorCenter + dir * doorHalf;
@@ -535,7 +610,6 @@ public class RackBuilder : MonoBehaviour
                 a.length = Mathf.Abs(dir * halfL - a.startZ) - endInset;
                 list.Add(a);
 
-                // opposite wall: starts in the middle
                 WallRun b = new WallRun();
                 b.wallSign = -doorSign;
                 b.startZ = dir * 0.05f;
@@ -548,7 +622,6 @@ public class RackBuilder : MonoBehaviour
         return list;
     }
 
-    // Puts a zone on the tightest wall space it still fits in
     // Finds the tightest wall space a zone still fits in (null if none)
     WallRun FindRun(ZonePlan zp, List<WallRun> runs)
     {
@@ -612,6 +685,42 @@ public class RackBuilder : MonoBehaviour
     //  Building
     // ------------------------------------------------------------------
 
+    void BuildDoorMarker(Transform parent)
+    {
+        Vector3 cs = grid.containerSize;
+        GameObject marker = new GameObject("Door Marker");
+        marker.transform.SetParent(parent, false);
+        Material red = MakeMat(Color.red);
+
+        Vector3 stripPos;
+        Vector3 stripSize;
+        Vector3 poleA;
+        Vector3 poleB;
+
+        if (DoorAtEnd())
+        {
+            float zEnd = (door == DoorPosition.EndMinusZ ? -1f : 1f) * (cs.z / 2f - 0.03f);
+            stripPos = new Vector3(0f, floorY + 0.025f, zEnd);
+            stripSize = new Vector3(doorWidth, 0.05f, 0.6f);
+            poleA = new Vector3(-doorWidth / 2f, floorY + 1.05f, zEnd);
+            poleB = new Vector3(doorWidth / 2f, floorY + 1.05f, zEnd);
+        }
+        else
+        {
+            float xWall = (door == DoorPosition.WallPlusX ? 1f : -1f) * (cs.x / 2f - 0.03f);
+            stripPos = new Vector3(xWall, floorY + 0.025f, doorCenter);
+            stripSize = new Vector3(0.6f, 0.05f, doorWidth);
+            poleA = new Vector3(xWall, floorY + 1.05f, doorCenter - doorWidth / 2f);
+            poleB = new Vector3(xWall, floorY + 1.05f, doorCenter + doorWidth / 2f);
+        }
+
+        GameObject[] parts = new GameObject[3];
+        parts[0] = Cube("Door Strip", marker.transform, stripPos, stripSize, red);
+        parts[1] = Cube("Door Pole A", marker.transform, poleA, new Vector3(0.06f, 2.1f, 0.06f), red);
+        parts[2] = Cube("Door Pole B", marker.transform, poleB, new Vector3(0.06f, 2.1f, 0.06f), red);
+        foreach (GameObject part in parts) DestroyNow(part.GetComponent<Collider>());
+    }
+
     void BuildRack(ZonePlan zp, float depth, Transform parent)
     {
         WallRun run = zp.run;
@@ -668,13 +777,13 @@ public class RackBuilder : MonoBehaviour
 
             float z = run.startZ + run.dir * (zp.start + 0.04f + zp.slotCenter[i]);
             float shelfTop = floorY + firstBoardTop + zp.slotLevel[i] * zp.spacing;
-            float x = run.wallSign * (halfW - wallGap - zp.slotLane[i] * zp.laneW - zp.laneW / 2f);
+            // box sits against the back of its lane
+            float x = run.wallSign * (halfW - wallGap - zp.slotLane[i] * zp.laneW - u.size.z / 2f);
             float y = shelfTop + u.size.y / 2f + 0.002f;
 
-            // flat colored pad (no collider, so it can't block anything)
             GameObject pad = GameObject.CreatePrimitive(PrimitiveType.Cube);
             DestroyNow(pad.GetComponent<Collider>());
-            pad.name = "Slot " + u.id + " (day " + u.day + ")";
+            pad.name = "Slot " + u.id + " x" + u.units + " (day " + u.day + ")";
             pad.transform.SetParent(group.transform, false);
             pad.transform.localPosition = new Vector3(x, shelfTop + 0.003f, z);
             pad.transform.localRotation = yaw;
@@ -685,11 +794,11 @@ public class RackBuilder : MonoBehaviour
             rend.sharedMaterial = PadMaterial(u.zone);
             rend.enabled = showSlotPads;
 
-            // the answer key
             SlotInfo info = new SlotInfo();
             info.boxId = u.id;
             info.zone = u.zone;
             info.day = u.day;
+            info.units = u.units;
             info.shelfLevel = zp.slotLevel[i];
             info.position = new Vector3(x, y, z);
             info.rotation = yaw;
@@ -748,6 +857,7 @@ public class RackBuilder : MonoBehaviour
 
     static void DestroyNow(Object o)
     {
+        if (o == null) return;
         if (Application.isPlaying) Destroy(o);
         else DestroyImmediate(o);
     }
@@ -782,7 +892,7 @@ public class RackBuilder : MonoBehaviour
         return key;
     }
 
-    // Turns the MissionDay text into one day number for box number k of qty
+    // Turns the MissionDay text into one day number for item number k of qty
     static int DayForUnit(string md, int k, int qty)
     {
         md = md.Trim();

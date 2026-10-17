@@ -127,6 +127,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemInfo
   itemId: GAS-01
+  units: 1
+  day: 0
+  slotNumber: -1
 --- !u!54 &8117555741833125870
 Rigidbody:
   m_ObjectHideFlags: 0
