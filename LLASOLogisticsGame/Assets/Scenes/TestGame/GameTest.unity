@@ -1028,6 +1028,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: FOOD
+  zoneCode: FOOD
   shelfHeight: 0.58
 --- !u!1 &65604341
 GameObject:
@@ -2599,6 +2600,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: MEDICAL
+  zoneCode: MEDICAL
   shelfHeight: 0.326
 --- !u!1 &169365199
 GameObject:
@@ -3510,6 +3512,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: EVA GEAR
+  zoneCode: EVA
   shelfHeight: 0.6
 --- !u!4 &236314806
 Transform:
@@ -6809,6 +6812,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: SPACESUITS
+  zoneCode: 
   shelfHeight: 0.6
 --- !u!1 &469262045
 GameObject:
@@ -9781,6 +9785,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: WASTE
+  zoneCode: WASTE
   shelfHeight: 0.58
 --- !u!1 &678427943
 GameObject:
@@ -11168,6 +11173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: SCIENCE
+  zoneCode: SCIENCE
   shelfHeight: 0.354
 --- !u!1001 &789193516
 PrefabInstance:
@@ -12046,6 +12052,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemTracker
   scanDistance: 4
+  flashSeconds: 1.5
   highlightMaterial: {fileID: 2100000, guid: 728bc4384302ef8479a3c2005e83afc3, type: 2}
 --- !u!4 &858956216
 Transform:
@@ -12721,6 +12728,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: CREW
+  zoneCode: CREW
   shelfHeight: 0.58
 --- !u!1 &889180486
 GameObject:
@@ -15754,6 +15762,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: EMERGENCY
+  zoneCode: EMERGENCY
   shelfHeight: 0.58
 --- !u!1 &1096236466
 GameObject:
@@ -22970,6 +22979,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: REPAIR AND POWER
+  zoneCode: MAINT
   shelfHeight: 0.58
 --- !u!1 &1761203930
 GameObject:
@@ -24165,6 +24175,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: WATER
+  zoneCode: WATER
   shelfHeight: 0.58
 --- !u!1001 &1809618890
 PrefabInstance:
@@ -27231,6 +27242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: GAS TANKS
+  zoneCode: GAS
   shelfHeight: 0.6
 --- !u!21 &2003207582
 Material:
