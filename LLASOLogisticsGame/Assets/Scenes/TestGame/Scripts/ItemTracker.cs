@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 // One saved scan
 public class TrackedRecord
@@ -17,6 +17,9 @@ public class ItemTracker : MonoBehaviour
 
     public float scanDistance = 4f;
 
+    [Header("Drag XRayMaterial here")]
+    public Material highlightMaterial;
+
     private Camera playerCamera;
     private ScannerToggle scannerToggle;
     private GridContainer grid;
@@ -25,9 +28,14 @@ public class ItemTracker : MonoBehaviour
 
     private Dictionary<ItemInfo, TrackedRecord> records = new Dictionary<ItemInfo, TrackedRecord>();
 
-    // The item the beam is pointing at
+    // The item the beam and glow are pointing at
     private ItemInfo highlighted;
     private GameObject beam;
+
+    // Glow bookkeeping
+    private Material glowMat;
+    private List<Renderer> glowRenderers = new List<Renderer>();
+    private List<Material[]> originalMats = new List<Material[]>();
 
     public ItemInfo Highlighted { get { return highlighted; } }
 
@@ -96,19 +104,24 @@ public class ItemTracker : MonoBehaviour
         }
     }
 
-    // Keeps the beam on top of the box it is pointing at
+    // Keeps the beam on the box and makes the glow pulse
+    // Makes the glow pulse
     void LateUpdate()
     {
-        if (beam == null) return;
-
+        // Nothing picked, or the box is gone
         if (highlighted == null)
         {
-            beam.SetActive(false);
+            StopGlow();
             return;
         }
 
-        Bounds b = GetBounds(highlighted);
-        beam.transform.position = new Vector3(b.center.x, b.max.y + 1.6f, b.center.z);
+        if (glowMat != null)
+        {
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
+            Color c = glowMat.color;
+            c.a = 0.25f + 0.4f * pulse;
+            glowMat.color = c;
+        }
     }
 
     // All saved scans, sorted by ID
@@ -132,7 +145,8 @@ public class ItemTracker : MonoBehaviour
         return LocationOf(GetBounds(r.item), out inHold);
     }
 
-    // Turns the beam on for this item. Calling it again for the same item turns it off.
+    // Turns the beam and glow on for this item. Calling it again for the same item turns them off.
+    // Turns the glow on for this item. Calling it again for the same item turns it off.
     public void ToggleHighlight(ItemInfo item)
     {
         if (item == null) return;
@@ -143,15 +157,56 @@ public class ItemTracker : MonoBehaviour
             return;
         }
 
+        // Switching from another item? Turn its glow off first.
+        StopGlow();
+
         highlighted = item;
-        if (beam == null) beam = MakeBeam();
-        beam.SetActive(true);
+        StartGlow(item);
     }
 
     public void ClearHighlight()
     {
         highlighted = null;
-        if (beam != null) beam.SetActive(false);
+        StopGlow();
+    }
+
+    // Adds the X-ray material on top of the box's own materials
+    void StartGlow(ItemInfo item)
+    {
+        if (highlightMaterial == null) return;
+
+        if (glowMat == null) glowMat = new Material(highlightMaterial);
+
+        foreach (Renderer r in item.GetComponentsInChildren<Renderer>())
+        {
+            // Skip anything that is not a plain mesh, and skip floating text labels
+            if (!(r is MeshRenderer)) continue;
+            if (r.GetComponent<TMP_Text>() != null) continue;
+
+            Material[] old = r.sharedMaterials;
+            Material[] extended = new Material[old.Length + 1];
+            for (int i = 0; i < old.Length; i++) extended[i] = old[i];
+            extended[old.Length] = glowMat;
+
+            glowRenderers.Add(r);
+            originalMats.Add(old);
+            r.sharedMaterials = extended;
+        }
+    }
+
+    // Puts the box's own materials back
+    void StopGlow()
+    {
+        for (int i = 0; i < glowRenderers.Count; i++)
+        {
+            if (glowRenderers[i] != null)
+            {
+                glowRenderers[i].sharedMaterials = originalMats[i];
+            }
+        }
+
+        glowRenderers.Clear();
+        originalMats.Clear();
     }
 
     // Picks the zone name + shelf, or falls back to the grid name
@@ -186,7 +241,7 @@ public class ItemTracker : MonoBehaviour
         return b;
     }
 
-    // Builds a tall yellow beam out of code (no files needed)
+    // Builds a tall beam out of code (no files needed)
     GameObject MakeBeam()
     {
         GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -194,11 +249,20 @@ public class ItemTracker : MonoBehaviour
         Destroy(g.GetComponent<Collider>());
         g.transform.localScale = new Vector3(0.12f, 1.5f, 0.12f);
 
-        Shader s = Shader.Find("Sprites/Default");
-        if (s == null) s = Shader.Find("Unlit/Color");
-
-        Material m = new Material(s);
-        m.color = new Color(1f, 0.9f, 0.1f, 0.6f);
+        Material m;
+        if (highlightMaterial != null)
+        {
+            // Same see-through material, so shelves can't hide the beam
+            m = new Material(highlightMaterial);
+            m.color = new Color(1f, 0.9f, 0.1f, 0.8f);
+        }
+        else
+        {
+            Shader s = Shader.Find("Sprites/Default");
+            if (s == null) s = Shader.Find("Unlit/Color");
+            m = new Material(s);
+            m.color = new Color(1f, 0.9f, 0.1f, 0.6f);
+        }
 
         Renderer r = g.GetComponent<Renderer>();
         r.material = m;
