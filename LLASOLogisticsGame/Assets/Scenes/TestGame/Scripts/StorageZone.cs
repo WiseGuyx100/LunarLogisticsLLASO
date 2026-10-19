@@ -3,8 +3,11 @@ using UnityEngine;
 // An invisible box that marks one storage area (like the "EVA GEAR" shelves)
 public class StorageZone : MonoBehaviour
 {
-    [Header("Type the name exactly like the sign in the hold")]
+    [Header("Name on the sign in the hold")]
     public string zoneName = "EVA GEAR";
+
+    [Header("Code from the CSV RequiredZone column (separate several with ;)")]
+    public string zoneCode = "";
 
     [Header("Distance between two shelves (meters)")]
     public float shelfHeight = 0.6f;
@@ -26,6 +29,20 @@ public class StorageZone : MonoBehaviour
         return Mathf.Max(1, n);
     }
 
+    // Does this zone accept an item with this RequiredZone code?
+    public bool Accepts(string requiredCode)
+    {
+        // If either one is blank we can't judge, so don't call it wrong
+        if (string.IsNullOrWhiteSpace(zoneCode)) return true;
+        if (string.IsNullOrWhiteSpace(requiredCode)) return true;
+
+        foreach (string part in zoneCode.Split(';'))
+        {
+            if (part.Trim().ToUpper() == requiredCode.Trim().ToUpper()) return true;
+        }
+        return false;
+    }
+
     // Draws the zone in the Scene view so you can place it
     void OnDrawGizmos()
     {
@@ -34,7 +51,7 @@ public class StorageZone : MonoBehaviour
         Gizmos.DrawWireCube(Vector3.zero, Vector3.one);
 
 #if UNITY_EDITOR
-        UnityEditor.Handles.Label(transform.position, zoneName);
+        UnityEditor.Handles.Label(transform.position, zoneName + "  [" + zoneCode + "]");
 #endif
     }
 }

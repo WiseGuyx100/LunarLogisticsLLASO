@@ -71,6 +71,7 @@ public class ItemInspector : MonoBehaviour
             {
                 shownItem = target;
                 ShowLabel(target);
+                if (ItemTracker.Instance != null) ItemTracker.Instance.MarkScanned(target);
                 audioSource.PlayOneShot(scanSound, scanVolume);
             }
         }

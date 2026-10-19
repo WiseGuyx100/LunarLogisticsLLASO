@@ -9,6 +9,8 @@ public class TrackedRecord
     public string id;
     public string itemName;
     public string location;
+    public string requiredZone;
+    public bool wrongZone;
 }
 
 public class ItemTracker : MonoBehaviour
@@ -16,6 +18,7 @@ public class ItemTracker : MonoBehaviour
     public static ItemTracker Instance;
 
     public float scanDistance = 4f;
+    public float flashSeconds = 1.5f;
 
     [Header("Drag XRayMaterial here")]
     public Material highlightMaterial;
@@ -28,14 +31,20 @@ public class ItemTracker : MonoBehaviour
 
     private Dictionary<ItemInfo, TrackedRecord> records = new Dictionary<ItemInfo, TrackedRecord>();
 
-    // The item the beam and glow are pointing at
-    private ItemInfo highlighted;
-    private GameObject beam;
+    // Boxes the player has scanned with Q
+    private HashSet<ItemInfo> scanned = new HashSet<ItemInfo>();
 
-    // Glow bookkeeping
+    // Yellow find-glow
+    private ItemInfo highlighted;
     private Material glowMat;
-    private List<Renderer> glowRenderers = new List<Renderer>();
-    private List<Material[]> originalMats = new List<Material[]>();
+
+    // Red wrong-zone flash
+    private ItemInfo flashItem;
+    private float flashTimeLeft;
+    private Material flashMat;
+
+    // Each box's own materials, saved so we can always put them back
+    private Dictionary<Renderer, Material[]> baseMats = new Dictionary<Renderer, Material[]>();
 
     public ItemInfo Highlighted { get { return highlighted; } }
 
@@ -55,6 +64,12 @@ public class ItemTracker : MonoBehaviour
         if (playerCamera == null) playerCamera = Camera.main;
     }
 
+    // Called by ItemInspector when the player scans a box with Q
+    public void MarkScanned(ItemInfo item)
+    {
+        if (item != null) scanned.Add(item);
+    }
+
     void Update()
     {
         if (!GameControls.StoreLocationPressed()) return;
@@ -68,6 +83,19 @@ public class ItemTracker : MonoBehaviour
 
         ItemInfo target = hit.collider.GetComponentInParent<ItemInfo>();
         if (target == null) return;
+
+        // The box must be scanned with Q first
+        if (!scanned.Contains(target))
+        {
+            if (inspector != null)
+            {
+                inspector.ShowMessage(
+                    "<color=#FF5050>CANNOT STORE</color>\n" +
+                    "Cannot store item without scanning first!\n" +
+                    "Press Q (or ZR) to scan it.");
+            }
+            return;
+        }
 
         Bounds b = GetBounds(target);
 
@@ -85,42 +113,63 @@ public class ItemTracker : MonoBehaviour
         }
 
         ItemData data = InventoryDatabase.Instance.Get(target.itemId);
+        StorageZone zone = FindZone(b);
 
         TrackedRecord r = new TrackedRecord();
         r.item = target;
         r.id = target.itemId;
         r.itemName = data != null ? data.itemName : target.itemId;
         r.location = location;
+        r.requiredZone = data != null ? data.requiredZone : "";
+        r.wrongZone = zone != null && data != null && !zone.Accepts(data.requiredZone);
 
         bool updated = records.ContainsKey(target);
         records[target] = r;
 
-        if (inspector != null)
+        string message =
+            (updated ? "LOCATION UPDATED" : "LOCATION STORED") + "\n" +
+            r.itemName + "  (" + r.id + ")\n" +
+            "Location: " + r.location;
+
+        if (r.wrongZone)
         {
-            inspector.ShowMessage(
-                (updated ? "LOCATION UPDATED" : "LOCATION STORED") + "\n" +
-                r.itemName + "  (" + r.id + ")\n" +
-                "Location: " + r.location);
+            message += "\n<color=#FF5050>WRONG ZONE! This item belongs in: " + r.requiredZone + "</color>";
+            StartFlash(target);
         }
+
+        if (inspector != null) inspector.ShowMessage(message);
     }
 
-    // Keeps the beam on the box and makes the glow pulse
-    // Makes the glow pulse
+    // Makes the glow pulse and runs the red flash
     void LateUpdate()
     {
-        // Nothing picked, or the box is gone
-        if (highlighted == null)
-        {
-            StopGlow();
-            return;
-        }
-
-        if (glowMat != null)
+        // Yellow find-glow pulse
+        if (highlighted != null && glowMat != null)
         {
             float pulse = 0.5f + 0.5f * Mathf.Sin(Time.time * 5f);
             Color c = glowMat.color;
             c.a = 0.25f + 0.4f * pulse;
             glowMat.color = c;
+        }
+
+        // Red wrong-zone flash
+        if (flashItem != null)
+        {
+            flashTimeLeft -= Time.deltaTime;
+
+            if (flashTimeLeft <= 0f)
+            {
+                ItemInfo done = flashItem;
+                flashItem = null;
+                ApplyOverlays(done);
+            }
+            else if (flashMat != null)
+            {
+                float blink = Mathf.Abs(Mathf.Sin(flashTimeLeft * Mathf.PI * 2f));
+                Color c = flashMat.color;
+                c.a = 0.75f * blink;
+                flashMat.color = c;
+            }
         }
     }
 
@@ -145,37 +194,59 @@ public class ItemTracker : MonoBehaviour
         return LocationOf(GetBounds(r.item), out inHold);
     }
 
-    // Turns the beam and glow on for this item. Calling it again for the same item turns them off.
-    // Turns the glow on for this item. Calling it again for the same item turns it off.
+    // Turns the yellow glow on for this item. Calling it again for the same item turns it off.
     public void ToggleHighlight(ItemInfo item)
     {
         if (item == null) return;
 
-        if (highlighted == item)
+        ItemInfo previous = highlighted;
+
+        if (highlighted == item) highlighted = null;
+        else highlighted = item;
+
+        if (highlighted != null && glowMat == null && highlightMaterial != null)
         {
-            ClearHighlight();
-            return;
+            glowMat = new Material(highlightMaterial);
+            glowMat.color = new Color(1f, 0.9f, 0.1f, 0.5f);
         }
 
-        // Switching from another item? Turn its glow off first.
-        StopGlow();
-
-        highlighted = item;
-        StartGlow(item);
+        ApplyOverlays(previous);
+        ApplyOverlays(highlighted);
     }
 
     public void ClearHighlight()
     {
+        ItemInfo previous = highlighted;
         highlighted = null;
-        StopGlow();
+        ApplyOverlays(previous);
     }
 
-    // Adds the X-ray material on top of the box's own materials
-    void StartGlow(ItemInfo item)
+    // Starts a quick red blink on a box
+    void StartFlash(ItemInfo item)
     {
         if (highlightMaterial == null) return;
 
-        if (glowMat == null) glowMat = new Material(highlightMaterial);
+        if (flashMat == null)
+        {
+            flashMat = new Material(highlightMaterial);
+            flashMat.color = new Color(1f, 0.1f, 0.1f, 0.75f);
+        }
+
+        ItemInfo previous = flashItem;
+        flashItem = item;
+        flashTimeLeft = flashSeconds;
+
+        ApplyOverlays(previous);
+        ApplyOverlays(item);
+    }
+
+    // Puts the right overlays on a box: its own materials + yellow glow and/or red flash
+    void ApplyOverlays(ItemInfo item)
+    {
+        if (item == null) return;
+
+        bool glow = (item == highlighted) && glowMat != null;
+        bool flash = (item == flashItem) && flashMat != null;
 
         foreach (Renderer r in item.GetComponentsInChildren<Renderer>())
         {
@@ -183,42 +254,34 @@ public class ItemTracker : MonoBehaviour
             if (!(r is MeshRenderer)) continue;
             if (r.GetComponent<TMP_Text>() != null) continue;
 
-            Material[] old = r.sharedMaterials;
-            Material[] extended = new Material[old.Length + 1];
-            for (int i = 0; i < old.Length; i++) extended[i] = old[i];
-            extended[old.Length] = glowMat;
+            // Save the box's own materials the first time we touch it
+            if (!baseMats.ContainsKey(r)) baseMats[r] = r.sharedMaterials;
 
-            glowRenderers.Add(r);
-            originalMats.Add(old);
-            r.sharedMaterials = extended;
+            List<Material> list = new List<Material>(baseMats[r]);
+            if (glow) list.Add(glowMat);
+            if (flash) list.Add(flashMat);
+
+            r.sharedMaterials = list.ToArray();
         }
     }
 
-    // Puts the box's own materials back
-    void StopGlow()
+    StorageZone FindZone(Bounds b)
     {
-        for (int i = 0; i < glowRenderers.Count; i++)
+        foreach (StorageZone z in zones)
         {
-            if (glowRenderers[i] != null)
-            {
-                glowRenderers[i].sharedMaterials = originalMats[i];
-            }
+            if (z != null && z.Contains(b.center)) return z;
         }
-
-        glowRenderers.Clear();
-        originalMats.Clear();
+        return null;
     }
 
     // Picks the zone name + shelf, or falls back to the grid name
     string LocationOf(Bounds b, out bool inHold)
     {
-        foreach (StorageZone z in zones)
+        StorageZone z = FindZone(b);
+        if (z != null)
         {
-            if (z != null && z.Contains(b.center))
-            {
-                inHold = true;
-                return z.zoneName + " - Shelf " + z.ShelfNumber(b.min.y);
-            }
+            inHold = true;
+            return z.zoneName + " - Shelf " + z.ShelfNumber(b.min.y);
         }
 
         if (grid != null && grid.IsInside(b.center))
@@ -239,35 +302,5 @@ public class ItemTracker : MonoBehaviour
         Bounds b = cols[0].bounds;
         foreach (Collider c in cols) b.Encapsulate(c.bounds);
         return b;
-    }
-
-    // Builds a tall beam out of code (no files needed)
-    GameObject MakeBeam()
-    {
-        GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        g.name = "FindBeam";
-        Destroy(g.GetComponent<Collider>());
-        g.transform.localScale = new Vector3(0.12f, 1.5f, 0.12f);
-
-        Material m;
-        if (highlightMaterial != null)
-        {
-            // Same see-through material, so shelves can't hide the beam
-            m = new Material(highlightMaterial);
-            m.color = new Color(1f, 0.9f, 0.1f, 0.8f);
-        }
-        else
-        {
-            Shader s = Shader.Find("Sprites/Default");
-            if (s == null) s = Shader.Find("Unlit/Color");
-            m = new Material(s);
-            m.color = new Color(1f, 0.9f, 0.1f, 0.6f);
-        }
-
-        Renderer r = g.GetComponent<Renderer>();
-        r.material = m;
-        r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-
-        return g;
     }
 }
