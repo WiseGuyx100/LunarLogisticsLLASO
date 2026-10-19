@@ -68,6 +68,21 @@ public static class GameControls
             || (p != null && p.leftTrigger.wasPressedThisFrame);
     }
 
+    // K  or  L and R together
+    public static bool KeybindsPressed()
+    {
+        Keyboard k = Keyboard.current;
+        Gamepad p = Gamepad.current;
+
+        bool key = k != null && k.kKey.wasPressedThisFrame;
+
+        bool combo = p != null &&
+            ((p.leftShoulder.wasPressedThisFrame && p.rightShoulder.isPressed) ||
+            (p.rightShoulder.wasPressedThisFrame && p.leftShoulder.isPressed));
+
+        return key || combo;
+    }
+
     // ---------- HELD DOWN (rotating the box) ----------
 
     public static bool TurnRightHeld()
