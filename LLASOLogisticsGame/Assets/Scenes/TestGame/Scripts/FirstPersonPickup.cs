@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -15,6 +16,9 @@ public class FirstPersonPickup : MonoBehaviour
     [SerializeField] private float rotateSpeed = 120f;   // degrees per second while a key is held
     [SerializeField] private float settleSpeed = 360f;   // how fast it straightens inside the container
 
+    [Header("Sliding into racks")]
+    [SerializeField] private float slideTime = 0.4f;     // how long the slide takes (seconds)
+
     private InputAction interactAction;
     private Rigidbody heldBody;
     private bool originalUseGravity;
@@ -25,6 +29,8 @@ public class FirstPersonPickup : MonoBehaviour
     private Collider[] playerColliders;
     private ItemInspector inspector;
     private GridContainer grid;
+    private StorageZone[] racks;
+    private Rigidbody slidingBody;
     private bool isRotatingByKey;
 
     private void Awake()
@@ -33,10 +39,11 @@ public class FirstPersonPickup : MonoBehaviour
             "Interact",
             InputActionType.Button,
             "<Keyboard>/e");
-            interactAction.AddBinding("<Gamepad>/buttonEast");
+        interactAction.AddBinding("<Gamepad>/buttonEast");
 
         inspector = FindFirstObjectByType<ItemInspector>();
         grid = FindFirstObjectByType<GridContainer>();
+        racks = FindObjectsByType<StorageZone>(FindObjectsSortMode.None);
         playerColliders = GetComponentsInChildren<Collider>();
     }
 
@@ -101,15 +108,8 @@ public class FirstPersonPickup : MonoBehaviour
                 Physics.SyncTransforms();
             }
 
-            // Measure how big the box is
-            Bounds b = heldColliders[0].bounds;
-            foreach (Collider c in heldColliders)
-            {
-                b.Encapsulate(c.bounds);
-            }
-
             // Use the snapped spot instead of the hand spot
-            targetPos = grid.Snap(targetPos, b.size);
+            targetPos = grid.Snap(targetPos, HeldBounds().size);
         }
 
         // Move with physics so walls and floors can block it.
@@ -118,7 +118,7 @@ public class FirstPersonPickup : MonoBehaviour
         heldBody.angularVelocity = Vector3.zero;
     }
 
-    // Turns the held box while the arrow keys are held down
+    // Turns the held box while the rotate buttons are held down
     private void HandleRotation()
     {
         isRotatingByKey = false;
@@ -170,6 +170,17 @@ public class FirstPersonPickup : MonoBehaviour
         e.y = Mathf.Round(e.y / 90f) * 90f;
         e.z = Mathf.Round(e.z / 90f) * 90f;
         return Quaternion.Euler(e);
+    }
+
+    // How big the held box is (all its colliders together)
+    private Bounds HeldBounds()
+    {
+        Bounds b = heldColliders[0].bounds;
+        foreach (Collider c in heldColliders)
+        {
+            b.Encapsulate(c.bounds);
+        }
+        return b;
     }
 
     private void TryPickupObject()
@@ -224,6 +235,12 @@ public class FirstPersonPickup : MonoBehaviour
             return;
         }
 
+        // Still sliding into a rack? Wait until it stops.
+        if (targetBody == slidingBody)
+        {
+            return;
+        }
+
         heldBody = targetBody;
         isRotatingByKey = false;
 
@@ -260,25 +277,69 @@ public class FirstPersonPickup : MonoBehaviour
 
         SetIgnorePlayerCollision(false);
 
-        // Snap to the grid if the box is inside the container
-        if (grid != null && grid.IsInside(heldBody.position))
+        bool docked = false;
+        Vector3 dockTarget = Vector3.zero;
+
+        // In front of a rack shelf? Then the box slides in (if it fits).
+        // (Not done when the script is being switched off.)
+        if (isActiveAndEnabled && racks != null && racks.Length > 0)
+        {
+            Quaternion originalRotation = heldBody.rotation;
+
+            // Straighten the box first so its size is measured properly
+            heldBody.rotation = SnapRotation(originalRotation);
+            Physics.SyncTransforms();
+
+            Bounds b = HeldBounds();
+
+            foreach (StorageZone z in racks)
+            {
+                if (z == null) continue;
+
+                Vector3 newCenter;
+                StorageZone.DockResult result = z.TryDock(b, heldBody, out newCenter);
+
+                if (result == StorageZone.DockResult.Docked)
+                {
+                    // Move the box's pivot by the same amount as its middle
+                    dockTarget = heldBody.position + (newCenter - b.center);
+                    docked = true;
+                    break;
+                }
+
+                if (result == StorageZone.DockResult.DoesNotFit)
+                {
+                    if (inspector != null)
+                    {
+                        inspector.ShowMessage(
+                            "<color=#FF5050>DOES NOT FIT</color>\n" +
+                            "This box does not fit on that shelf\n(too big, or no room).");
+                    }
+                    break;
+                }
+            }
+
+            // Not docked? Put the rotation back the way the player had it.
+            if (!docked)
+            {
+                heldBody.rotation = originalRotation;
+                Physics.SyncTransforms();
+            }
+        }
+
+        // Not in a rack? Snap to the grid if the box is inside the container
+        if (!docked && grid != null && grid.IsInside(heldBody.position))
         {
             // Straighten it to the nearest 90 degrees first
             heldBody.rotation = SnapRotation(heldBody.rotation);
             Physics.SyncTransforms();
 
-            // Measure how big the box is
-            Bounds b = heldColliders[0].bounds;
-            foreach (Collider c in heldColliders)
-            {
-                b.Encapsulate(c.bounds);
-            }
-
             // Snap using the box size
-            heldBody.position = grid.Snap(heldBody.position, b.size);
+            heldBody.position = grid.Snap(heldBody.position, HeldBounds().size);
         }
 
         heldBody.linearVelocity = Vector3.zero;
+        heldBody.angularVelocity = Vector3.zero;
         heldBody.useGravity = originalUseGravity;
         heldBody.constraints = originalConstraints;
         heldBody.interpolation = originalInterpolation;
@@ -289,9 +350,44 @@ public class FirstPersonPickup : MonoBehaviour
             inspector.heldItem = null;
         }
 
+        if (docked)
+        {
+            StartCoroutine(SlideRoutine(heldBody, dockTarget));
+        }
+
         heldBody = null;
         heldColliders = null;
         isRotatingByKey = false;
+    }
+
+    // Glides the box into the rack
+    private IEnumerator SlideRoutine(Rigidbody body, Vector3 target)
+    {
+        slidingBody = body;
+
+        bool wasKinematic = body.isKinematic;
+        body.isKinematic = true;
+
+        Vector3 start = body.position;
+        float t = 0f;
+
+        while (t < slideTime)
+        {
+            if (body == null) yield break;
+
+            t += Time.deltaTime;
+            float k = Mathf.SmoothStep(0f, 1f, t / slideTime);
+            body.position = Vector3.Lerp(start, target, k);
+            yield return null;
+        }
+
+        if (body != null)
+        {
+            body.position = target;
+            body.isKinematic = wasKinematic;
+        }
+
+        slidingBody = null;
     }
 
     private void SetIgnorePlayerCollision(bool ignore)

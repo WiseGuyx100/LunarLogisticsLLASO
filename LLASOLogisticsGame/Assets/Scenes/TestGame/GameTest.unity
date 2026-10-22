@@ -1030,6 +1030,9 @@ MonoBehaviour:
   zoneName: FOOD
   zoneCode: FOOD
   shelfHeight: 0.58
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1 &65604341
 GameObject:
   m_ObjectHideFlags: 0
@@ -2602,6 +2605,9 @@ MonoBehaviour:
   zoneName: MEDICAL
   zoneCode: MEDICAL
   shelfHeight: 0.326
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1 &169365199
 GameObject:
   m_ObjectHideFlags: 0
@@ -3514,6 +3520,9 @@ MonoBehaviour:
   zoneName: EVA GEAR
   zoneCode: EVA
   shelfHeight: 0.6
+  firstShelfOffset: 0
+  openSide: 1
+  dockDistance: 1
 --- !u!4 &236314806
 Transform:
   m_ObjectHideFlags: 0
@@ -6814,6 +6823,9 @@ MonoBehaviour:
   zoneName: SPACESUITS
   zoneCode: 
   shelfHeight: 0.6
+  firstShelfOffset: 0
+  openSide: 1
+  dockDistance: 1
 --- !u!1 &469262045
 GameObject:
   m_ObjectHideFlags: 0
@@ -9787,6 +9799,9 @@ MonoBehaviour:
   zoneName: WASTE
   zoneCode: WASTE
   shelfHeight: 0.58
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1 &678427943
 GameObject:
   m_ObjectHideFlags: 0
@@ -11175,6 +11190,9 @@ MonoBehaviour:
   zoneName: SCIENCE
   zoneCode: SCIENCE
   shelfHeight: 0.354
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1001 &789193516
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12730,6 +12748,9 @@ MonoBehaviour:
   zoneName: CREW
   zoneCode: CREW
   shelfHeight: 0.58
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1 &889180486
 GameObject:
   m_ObjectHideFlags: 0
@@ -15764,6 +15785,9 @@ MonoBehaviour:
   zoneName: EMERGENCY
   zoneCode: EMERGENCY
   shelfHeight: 0.58
+  firstShelfOffset: 0
+  openSide: 1
+  dockDistance: 1
 --- !u!1 &1096236466
 GameObject:
   m_ObjectHideFlags: 0
@@ -16939,6 +16963,7 @@ MonoBehaviour:
   maxHoldDistance: 2
   rotateSpeed: 120
   settleSpeed: 360
+  slideTime: 0.4
 --- !u!114 &1190437253
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -22981,6 +23006,9 @@ MonoBehaviour:
   zoneName: REPAIR AND POWER
   zoneCode: MAINT
   shelfHeight: 0.58
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1 &1761203930
 GameObject:
   m_ObjectHideFlags: 0
@@ -24177,6 +24205,9 @@ MonoBehaviour:
   zoneName: WATER
   zoneCode: WATER
   shelfHeight: 0.58
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!1001 &1809618890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27244,6 +27275,9 @@ MonoBehaviour:
   zoneName: GAS TANKS
   zoneCode: GAS
   shelfHeight: 0.6
+  firstShelfOffset: 0
+  openSide: 0
+  dockDistance: 1
 --- !u!21 &2003207582
 Material:
   serializedVersion: 8
