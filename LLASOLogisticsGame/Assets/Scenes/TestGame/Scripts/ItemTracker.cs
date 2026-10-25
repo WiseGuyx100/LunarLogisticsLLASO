@@ -281,7 +281,7 @@ public class ItemTracker : MonoBehaviour
         if (z != null)
         {
             inHold = true;
-            return z.zoneName + " - Shelf " + z.ShelfNumber(b.min.y);
+            return z.zoneName + " - " + z.ShelfLabel(b);
         }
 
         if (grid != null && grid.IsInside(b.center))

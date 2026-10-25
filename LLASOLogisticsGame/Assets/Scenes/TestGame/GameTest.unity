@@ -1010,7 +1010,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.8249998, y: 0.883, z: -4.341}
-  m_LocalScale: {x: 0.55, y: 1.7659999, z: 1.676}
+  m_LocalScale: {x: 0.6, y: 1.7659999, z: 1.676}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 58087843}
@@ -1029,10 +1029,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: FOOD
   zoneCode: FOOD
-  shelfHeight: 0.58
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &65604341
 GameObject:
   m_ObjectHideFlags: 0
@@ -2585,7 +2583,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.825, y: 0.979, z: 5.716}
-  m_LocalScale: {x: 0.55, y: 1.958, z: 0.612}
+  m_LocalScale: {x: 0.6, y: 1.958, z: 0.612}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1947231459}
@@ -2604,10 +2602,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: MEDICAL
   zoneCode: MEDICAL
-  shelfHeight: 0.326
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &169365199
 GameObject:
   m_ObjectHideFlags: 0
@@ -3519,10 +3515,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: EVA GEAR
   zoneCode: EVA
-  shelfHeight: 0.6
-  firstShelfOffset: 0
-  openSide: 1
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!4 &236314806
 Transform:
   m_ObjectHideFlags: 0
@@ -3532,8 +3526,8 @@ Transform:
   m_GameObject: {fileID: 236314804}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.82299995, y: 0.922, z: 3.121}
-  m_LocalScale: {x: 0.55, y: 1.8382638, z: 2.998}
+  m_LocalPosition: {x: 0.81, y: 0.922, z: 3.121}
+  m_LocalScale: {x: 0.6, y: 1.8382638, z: 2.998}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1059625000}
@@ -6803,7 +6797,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.825, y: 0.61, z: 5.35}
-  m_LocalScale: {x: 0.55, y: 1.22, z: 1.34}
+  m_LocalScale: {x: 0.6, y: 1.22, z: 1.34}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1994967049}
@@ -6822,10 +6816,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: SPACESUITS
   zoneCode: 
-  shelfHeight: 0.6
-  firstShelfOffset: 0
-  openSide: 1
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &469262045
 GameObject:
   m_ObjectHideFlags: 0
@@ -9779,7 +9771,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.825, y: 0.883, z: -5.526}
-  m_LocalScale: {x: 0.55, y: 1.7659999, z: 0.612}
+  m_LocalScale: {x: 0.6, y: 1.7659999, z: 0.612}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8558425}
@@ -9798,10 +9790,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: WASTE
   zoneCode: WASTE
-  shelfHeight: 0.58
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &678427943
 GameObject:
   m_ObjectHideFlags: 0
@@ -11170,7 +11160,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.825, y: 0.8849999, z: -4.275}
-  m_LocalScale: {x: 0.55, y: 1.77, z: 1.69}
+  m_LocalScale: {x: 0.6, y: 1.77, z: 1.69}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1179417882}
@@ -11189,10 +11179,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: SCIENCE
   zoneCode: SCIENCE
-  shelfHeight: 0.354
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1001 &789193516
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12728,7 +12716,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.825, y: 0.883, z: -0.888}
-  m_LocalScale: {x: 0.55, y: 1.766, z: 1.676}
+  m_LocalScale: {x: 0.6, y: 1.766, z: 1.676}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1118411022}
@@ -12747,10 +12735,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: CREW
   zoneCode: CREW
-  shelfHeight: 0.58
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &889180486
 GameObject:
   m_ObjectHideFlags: 0
@@ -15765,7 +15751,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.825, y: 0.883, z: 1.256}
-  m_LocalScale: {x: 0.55, y: 1.766, z: 0.612}
+  m_LocalScale: {x: 0.6, y: 1.766, z: 0.612}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 74630350}
@@ -15784,10 +15770,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: EMERGENCY
   zoneCode: EMERGENCY
-  shelfHeight: 0.58
-  firstShelfOffset: 0
-  openSide: 1
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &1096236466
 GameObject:
   m_ObjectHideFlags: 0
@@ -22986,7 +22970,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.8249998, y: 0.883, z: -2.624}
-  m_LocalScale: {x: 0.55, y: 1.7659999, z: 1.676}
+  m_LocalScale: {x: 0.6, y: 1.7659999, z: 1.676}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1723689285}
@@ -23005,10 +22989,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: REPAIR AND POWER
   zoneCode: MAINT
-  shelfHeight: 0.58
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1 &1761203930
 GameObject:
   m_ObjectHideFlags: 0
@@ -24185,7 +24167,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0.825, y: 0.88, z: -2.16}
-  m_LocalScale: {x: 0.55, y: 1.76, z: 2.42}
+  m_LocalScale: {x: 0.6, y: 1.76, z: 2.42}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2070705989}
@@ -24204,10 +24186,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: WATER
   zoneCode: WATER
-  shelfHeight: 0.58
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!1001 &1809618890
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -27255,7 +27235,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -0.825, y: 0.68, z: 2.7}
-  m_LocalScale: {x: 0.55, y: 1.36, z: 5.3}
+  m_LocalScale: {x: 0.58, y: 1.36, z: 5.3}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 462275394}
@@ -27274,10 +27254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::StorageZone
   zoneName: GAS TANKS
   zoneCode: GAS
-  shelfHeight: 0.6
-  firstShelfOffset: 0
-  openSide: 0
   dockDistance: 1
+  verticalAssist: 0.35
 --- !u!21 &2003207582
 Material:
   serializedVersion: 8
