@@ -9,12 +9,17 @@ public class FPSMovement : MonoBehaviour
     [SerializeField] private float runSpeed = 8f;
     [SerializeField] private float crouchSpeed = 2f;
 
+    [Header("Feel (smooth start and stop)")]
+    [SerializeField] private float acceleration = 14f;  // how quickly you speed up (higher = snappier)
+    [SerializeField] private float deceleration = 18f;  // how quickly you slow down (higher = stops faster)
+    [SerializeField] private float airControl = 0.3f;   // 0 = no steering in the air, 1 = same as the ground
+
     [Header("Jump and Fall")]
     [SerializeField] private float jumpForce = 7f;
     [SerializeField] private float gravity = -12f;
     [SerializeField] private float initialFallVelocity = -2f;
 
-    [Header("Crouching")]  
+    [Header("Crouching")]
     [SerializeField] private float standingHeight = 2f;
     [SerializeField] private float crouchingHeight = 1f;
     [SerializeField] private float crouchTransitionSpeed = 10f;
@@ -35,8 +40,10 @@ public class FPSMovement : MonoBehaviour
     private bool _isCrouching;
     private float _verticalVelocity;
     private float _targetHeight;
+    private Vector3 _horizontalVelocity;   // how fast you are really moving right now
 
-    private void Awake() {
+    private void Awake()
+    {
         _characterController = GetComponent<CharacterController>();
         _targetHeight = standingHeight;
     }
@@ -88,7 +95,7 @@ public class FPSMovement : MonoBehaviour
     {
         if (_isCrouching)
         {
-            if(!CanStandUp())
+            if (!CanStandUp())
             {
                 return;
             }
@@ -101,7 +108,8 @@ public class FPSMovement : MonoBehaviour
         _isCrouching = !_isCrouching;
     }
 
-    private bool CanStandUp () {
+    private bool CanStandUp()
+    {
         return !Physics.Raycast(
             transform.position + _characterController.center,
             Vector3.up,
@@ -126,9 +134,37 @@ public class FPSMovement : MonoBehaviour
 
     private void HandleMovement()
     {
-        var move = cameraTransform.TransformDirection(new Vector3(_moveInput.x, 0, _moveInput.y)).normalized;
+        // Which way do you want to go? (flat, so looking up or down doesn't slow you)
+        Vector3 forward = cameraTransform.forward;
+        forward.y = 0f;
+        forward.Normalize();
+
+        Vector3 right = cameraTransform.right;
+        right.y = 0f;
+        right.Normalize();
+
+        Vector3 wishDirection = forward * _moveInput.y + right * _moveInput.x;
+        wishDirection = Vector3.ClampMagnitude(wishDirection, 1f);   // a gentle stick push stays gentle
+
+        // How fast do you want to go?
         var currentSpeed = _isCrouching ? crouchSpeed : _isRunning ? runSpeed : walkSpeed;
-        var finalMove = move * currentSpeed;
+        Vector3 targetVelocity = wishDirection * currentSpeed;
+
+        // Speed up while pushing, slow down when you let go
+        float rate = wishDirection.sqrMagnitude > 0.0001f ? acceleration : deceleration;
+
+        // Less steering in the air, so jumps keep their momentum
+        if (!_isGrounded)
+        {
+            rate *= airControl;
+        }
+
+        _horizontalVelocity = Vector3.MoveTowards(
+            _horizontalVelocity,
+            targetVelocity,
+            rate * Time.deltaTime);
+
+        Vector3 finalMove = _horizontalVelocity;
         finalMove.y = _verticalVelocity;
 
         var collisions = _characterController.Move(finalMove * Time.deltaTime);
@@ -154,8 +190,8 @@ public class FPSMovement : MonoBehaviour
         var cameraTargetPosition = cameraTransform.localPosition;
         cameraTargetPosition.y = _targetHeight - cameraOffset;
         cameraTransform.localPosition = Vector3.Lerp(
-            cameraTransform.localPosition, 
-            cameraTargetPosition, 
+            cameraTransform.localPosition,
+            cameraTargetPosition,
             crouchTransitionSpeed * Time.deltaTime);
     }
 }
