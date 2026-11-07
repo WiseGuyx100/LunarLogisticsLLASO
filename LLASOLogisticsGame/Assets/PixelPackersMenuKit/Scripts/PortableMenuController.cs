@@ -117,9 +117,36 @@ namespace PixelPackersMenuKit
         RectTransform Stretch(string name,Transform parent,Vector2 min,Vector2 max)
         {var r=new GameObject(name,typeof(RectTransform)).GetComponent<RectTransform>();r.SetParent(parent,false);r.anchorMin=Vector2.zero;r.anchorMax=Vector2.one;r.offsetMin=min;r.offsetMax=max;return r;}
     }
-    public static class MenuSounds
+        public static class MenuSounds
     {
-        // Hook retained for the UI animation scripts; no game audio manager dependency.
-        public static void Play(string cue,float volume){}
+        static AudioSource source;
+        static readonly System.Collections.Generic.Dictionary<string, AudioClip> clips =
+            new System.Collections.Generic.Dictionary<string, AudioClip>();
+
+        public static void Play(string cue, float volume)
+        {
+            // Make a speaker the first time we need one
+            if (source == null)
+            {
+                var speaker = new GameObject("Menu Sounds", typeof(AudioSource));
+                UnityEngine.Object.DontDestroyOnLoad(speaker);
+                source = speaker.GetComponent<AudioSource>();
+                source.playOnAwake = false;
+                source.spatialBlend = 0f;
+            }
+
+            // Find the sound file in Resources/PixelPackersMenuKit (named Hover, Click, ...)
+            AudioClip clip;
+            if (!clips.TryGetValue(cue, out clip))
+            {
+                clip = Resources.Load<AudioClip>("PixelPackersMenuKit/" + cue);
+                clips[cue] = clip;
+            }
+
+            if (clip != null)
+            {
+                source.PlayOneShot(clip, volume);
+            }
+        }
     }
 }
