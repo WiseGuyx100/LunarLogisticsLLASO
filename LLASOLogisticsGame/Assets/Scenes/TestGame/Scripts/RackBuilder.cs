@@ -22,6 +22,13 @@ public class RackBuilder : MonoBehaviour
     [Header("Grid container (leave empty and it finds it)")]
     public GridContainer grid;
 
+    [Header("Container to follow (leave empty and it finds the object named CONTAINER)")]
+    public Transform container;
+    public bool followContainer = true;     // on Build, CargoGrid (and the racks) move to the container
+    [SerializeField, HideInInspector] Vector3 gridOffset;       // where CargoGrid sits inside the container
+    [SerializeField, HideInInspector] Quaternion gridRotOffset = Quaternion.identity;
+    [SerializeField, HideInInspector] bool offsetSaved;
+
     [Header("Mode")]
     public bool condensed = true;          // ON = items grouped into CTBs (fewer boxes)
     public float packEfficiency = 0.7f;    // how full a CTB gets (by volume)
@@ -174,6 +181,34 @@ public class RackBuilder : MonoBehaviour
         if (m != null) m.gameObject.SetActive(false);
     }
 
+    Transform FindContainer()
+    {
+        if (container != null) return container;
+        GameObject go = GameObject.Find("CONTAINER");
+        if (go != null) container = go.transform;
+        return container;
+    }
+
+    // Moves CargoGrid so it sits in the container the same way it did the first time.
+    // The racks, pads and door marker are children of CargoGrid, so they come along.
+    void SnapGridToContainer()
+    {
+        if (!followContainer) return;
+        Transform c = FindContainer();
+        if (c == null || grid == null || c == grid.transform) return;
+
+        if (!offsetSaved)
+        {
+            // first time: remember where CargoGrid is right now, so nothing jumps
+            gridOffset = c.InverseTransformPoint(grid.transform.position);
+            gridRotOffset = Quaternion.Inverse(c.rotation) * grid.transform.rotation;
+            offsetSaved = true;
+        }
+
+        grid.transform.position = c.TransformPoint(gridOffset);
+        grid.transform.rotation = c.rotation * gridRotOffset;
+    }
+
     GridContainer FindGrid()
     {
         GridContainer g = GetComponent<GridContainer>();
@@ -240,6 +275,7 @@ public class RackBuilder : MonoBehaviour
             return;
         }
 
+        SnapGridToContainer();
         RemoveRacks();
         slots.Clear();
         padMats.Clear();
@@ -448,6 +484,33 @@ public class RackBuilder : MonoBehaviour
             DestroyNow(old.gameObject);
         }
         slots.Clear();
+    }
+
+    [ContextMenu("5. Move racks to the container (no rebuild)")]
+    public void MoveRacksToContainer()
+    {
+        if (grid == null) grid = FindGrid();
+        if (grid == null) return;
+        SnapGridToContainer();
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        Debug.Log("RackBuilder: moved the racks to the container. Rerun Tools > Make Cargo Boxes to move the boxes too.");
+    }
+
+    [ContextMenu("6. Remember the current spot as the container's rack spot")]
+    public void RememberSpot()
+    {
+        if (grid == null) grid = FindGrid();
+        Transform c = FindContainer();
+        if (grid == null || c == null) return;
+        gridOffset = c.InverseTransformPoint(grid.transform.position);
+        gridRotOffset = Quaternion.Inverse(c.rotation) * grid.transform.rotation;
+        offsetSaved = true;
+#if UNITY_EDITOR
+        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+        Debug.Log("RackBuilder: saved. Racks will now always sit in the container like this.");
     }
 
     // SIDE TOOL: puts every box into its slot. Only works while the game is playing.
