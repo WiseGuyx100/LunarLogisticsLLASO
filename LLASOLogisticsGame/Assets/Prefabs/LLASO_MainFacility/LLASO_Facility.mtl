@@ -50,3 +50,8 @@ Kd 0.70 0.72 0.76
 Ka 0 0 0
 Ks 0 0 0
 
+newmtl Fac_Light
+Kd 0.98 0.98 1.00
+Ka 0 0 0
+Ks 0 0 0
+
