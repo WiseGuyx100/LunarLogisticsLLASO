@@ -1,23 +1,21 @@
-# Electric Tug — CyberHex Glass Cargo Edition (V6)
+# Electric Tug — CyberHex Glass Cargo Edition (V7)
 
-An advanced, programmatically generated futuristic electric tug featuring a fully connected, seamless sideways hexagonal glass cargo container, a matching hexagonal rear hatch door, a sleek low-profile seat cushion, and independent player scaling.
+Drop-in replacement for V6 (same folder name and script GUIDs, so just overwrite the files).
 
-## Features
-- **Seamless Connected Hexagonal Glass Cargo Bay**: All glass panels of the rear container are meticulously fitted and connected edge-to-edge with reinforced cyber framing to form a unified hexagonal tube.
-- **Hexagonal Rear Hatch Door**: The rear trunk hatch (`Z` key) is shaped as a true matching hexagon, sealing the container completely and opening smoothly on its top pivot (95-degree wide angle).
-- **Sleek Seat Cushion**: Replaced the bulky multi-part chair with a clean, low-profile driver seat cushion.
-- **Independent Player Scale**: Player entry and exit handles position/rotation matching without parenting scale distortion, allowing you to freely scale the tug in Unity without altering the player's size.
-- **Solid Hexagonal Collision**: Precision physics colliders on all hexagonal glass panels (floor, side walls, roof, and hatch) so cargo boxes stay securely inside without sliding through.
+## What changed in V7
+- **True hexagonal cargo tube**: every glass panel is a mitered prism cut from one hexagon profile, so panels meet edge-to-edge with no gaps. Glowing hex ribs, hex front bulkhead.
+- **Hex rear hatch**: frame, glass, glow outline, latch and tail lamps are all the same hexagon as the bay. Convex hex collider.
+- **No overlapping parts**: every visible piece touches its neighbours instead of sharing space (checked offline: 0 overlaps), so no z-fighting.
+- **Futuristic nose**: sloped hex cowling, hex headlights (with real spotlights while driving), glowing hex grille, hood stripes, hex bumpers with light bars.
+- **Clear driver view**: the big black steering wheel disc is replaced by a tiny open hex yoke set low on a low dash. Raked windshield.
+- **Animated rig**: wheels roll, front wheels steer, the yoke turns. Hex hub caps and hex wheel arches.
+- **Physics**: the tug now rides on four wheel spheres (no more sinking into the ground); bay walls use exact convex hex colliders; cab, nose and bumpers have colliders.
+- **No new keybinds.**
 
-## Setup Instructions
-1. Copy the `ElectricTug_CyberHex_V6` folder into your Unity project's `Assets/` directory.
-2. Allow Unity to compile scripts.
-3. Use **GameObject → Logistics Game → Create CyberHex Glass Cargo Tug V6**.
-4. Press **Play**, approach the tug, and press **F** to enter.
-5. Press **Z** to open/close the rear hexagonal cargo hatch!
+## Setup
+1. Overwrite the `ElectricTug_CyberHex_V6` folder in your project with this one and let Unity compile.
+2. Menu: **GameObject → Logistics Game → Create CyberHex Glass Cargo Tug V7**.
+3. Generated meshes/materials/prefab land in `Assets/ElectricTug_CyberHex_V7/`. Replace your old tug in the scene with the new prefab.
 
-## Controls
-- **F**: Enter / Exit Tug
-- **Z**: Toggle Rear Cargo Hatch (Open / Close)
-- **W / S** (or **Up / Down**): Drive / Reverse
-- **A / D** (or **Left / Right**): Steer Left / Right
+## Controls (unchanged)
+F enter/exit · Z hatch · W/S drive · A/D steer

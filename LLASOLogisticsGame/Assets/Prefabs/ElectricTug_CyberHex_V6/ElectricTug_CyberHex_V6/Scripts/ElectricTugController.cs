@@ -23,7 +23,18 @@ public sealed class ElectricTugController : MonoBehaviour
     [SerializeField, Range(45f, 110f)] private float hatchOpenAngle = 95f;
     [SerializeField, Min(1f)] private float hatchAnimationSpeed = 8.0f;
 
+    [Header("Visual Rig (assigned by the V7 builder, all optional)")]
+    [SerializeField] private Transform[] wheelSpinPivots;
+    [SerializeField] private Transform[] frontSteerPivots;
+    [SerializeField] private Transform steeringYoke;
+    [SerializeField] private Light[] headlights;
+    [SerializeField, Min(0.05f)] private float wheelRadius = 0.37f;
+    [SerializeField, Range(0f, 45f)] private float maxWheelSteerAngle = 28f;
+    [SerializeField, Range(0f, 180f)] private float maxYokeRoll = 70f;
+
     private Rigidbody body;
+    private float wheelSpin;
+    private float visualSteer;
     private FPSMovement nearbyPlayer;
     private Transform playerRoot;
     private CharacterController playerController;
@@ -44,7 +55,7 @@ public sealed class ElectricTugController : MonoBehaviour
         body.mass = 5500f;
         body.linearDamping = 2.2f;
         body.angularDamping = 5.0f;
-        body.centerOfMass = new Vector3(0f, -0.16f, -0.38f);
+        body.centerOfMass = new Vector3(0f, 0.30f, -0.9f);
         body.interpolation = RigidbodyInterpolation.Interpolate;
         body.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
         body.collisionDetectionMode = CollisionDetectionMode.ContinuousDynamic;
@@ -59,19 +70,27 @@ public sealed class ElectricTugController : MonoBehaviour
         }
 
         Keyboard keyboard = Keyboard.current;
-        if (keyboard == null) return;
-
-        // Enter / Exit via F key
-        if (keyboard.fKey.wasPressedThisFrame)
+        float steerInput = 0f;
+        if (keyboard != null)
         {
-            if (occupied) ExitVehicle();
-            else if (nearbyPlayer != null) EnterVehicle(nearbyPlayer);
-        }
+            // Enter / Exit via F key
+            if (keyboard.fKey.wasPressedThisFrame)
+            {
+                if (occupied) ExitVehicle();
+                else if (nearbyPlayer != null) EnterVehicle(nearbyPlayer);
+            }
 
-        // Toggle Cargo Trunk Hatch via Z key
-        if (occupied && keyboard.zKey.wasPressedThisFrame)
-        {
-            hatchOpen = !hatchOpen;
+            // Toggle Cargo Trunk Hatch via Z key
+            if (occupied && keyboard.zKey.wasPressedThisFrame)
+            {
+                hatchOpen = !hatchOpen;
+            }
+
+            if (occupied)
+            {
+                if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) steerInput -= 1f;
+                if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) steerInput += 1f;
+            }
         }
 
         // Smoothly animate cargo hatch open/close rotation
@@ -81,6 +100,37 @@ public sealed class ElectricTugController : MonoBehaviour
             Quaternion targetRot = Quaternion.Euler(targetAngle, 0f, 0f);
             cargoHatchPivot.localRotation = Quaternion.Slerp(cargoHatchPivot.localRotation, targetRot, hatchAnimationSpeed * Time.deltaTime);
         }
+
+        AnimateRig(steerInput);
+    }
+
+    /// <summary>Rolls the wheels, steers the front wheels and the yoke, and switches headlights (visual only).</summary>
+    private void AnimateRig(float steerInput)
+    {
+        float forwardVelocity = transform.InverseTransformDirection(body.linearVelocity).z;
+        wheelSpin = Mathf.Repeat(wheelSpin + forwardVelocity / wheelRadius * Mathf.Rad2Deg * Time.deltaTime, 360f);
+        visualSteer = Mathf.MoveTowards(visualSteer, steerInput * maxWheelSteerAngle, 160f * Time.deltaTime);
+
+        if (wheelSpinPivots != null)
+        {
+            Quaternion spin = Quaternion.Euler(wheelSpin, 0f, 0f);
+            for (int i = 0; i < wheelSpinPivots.Length; i++)
+                if (wheelSpinPivots[i] != null) wheelSpinPivots[i].localRotation = spin;
+        }
+
+        if (frontSteerPivots != null)
+        {
+            Quaternion steer = Quaternion.Euler(0f, visualSteer, 0f);
+            for (int i = 0; i < frontSteerPivots.Length; i++)
+                if (frontSteerPivots[i] != null) frontSteerPivots[i].localRotation = steer;
+        }
+
+        if (steeringYoke != null && maxWheelSteerAngle > 0.01f)
+            steeringYoke.localRotation = Quaternion.Euler(0f, 0f, -(visualSteer / maxWheelSteerAngle) * maxYokeRoll);
+
+        if (headlights != null)
+            for (int i = 0; i < headlights.Length; i++)
+                if (headlights[i] != null && headlights[i].enabled != occupied) headlights[i].enabled = occupied;
     }
 
     private void LateUpdate()
