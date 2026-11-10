@@ -4,69 +4,141 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using TMPro; // Include if using TextMeshPro
 using UnityEngine.UI;
+using TMPro;
 
 public class GroqChatManager : MonoBehaviour
 {
-    private string apiKey = "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";
-    private string apiEndpoint = "https://api.groq.com/openai/v1/chat/completions";
+    [Header("API")]
+    [SerializeField] private string apiKey = "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";
+    [SerializeField] private string apiEndpoint = "https://api.groq.com/openai/v1/chat/completions";
+    [SerializeField] private string model = "openai/gpt-oss-20b";
 
-    [Header("UI References")]
+    [Header("UI")]
     public TMP_InputField userInputField;
     public TextMeshProUGUI responseText;
     public Button sendButton;
 
+    [Header("Coach")]
+    [TextArea(4, 8)]
+    [SerializeField]
+    private string coachInstructions =
+        "You are the packing coach inside a NASA HUNCH LASSO training simulation. " +
+        "Help the player stow cargo correctly. Use the packing state included in this prompt. " +
+        "Give one short hint. Reveal the full procedure only when the player asks for the answer. " +
+        "If the packing state is missing, say which fact you need from the simulation.";
+
+    [TextArea(4, 10)]
+    [SerializeField] private string packingState = "No packing state has been reported yet.";
+
+    [SerializeField] private int maxHistoryMessages = 12;
+
+    private readonly List<Message> history = new List<Message>();
+    private bool requestInFlight;
+
     [Serializable]
-    public class Message { public string role; public string content; }
+    public class Message
+    {
+        public string role;
+        public string content;
+    }
+
     [Serializable]
-    public class ChatRequest { public string model; public List<Message> messages; }
+    public class ChatRequest
+    {
+        public string model;
+        public List<Message> messages;
+    }
+
     [Serializable]
-    public class Choice { public Message message; }
+    public class Choice
+    {
+        public Message message;
+    }
+
     [Serializable]
-    public class ChatResponse { public List<Choice> choices; }
+    public class ChatResponse
+    {
+        public List<Choice> choices;
+    }
 
     void Start()
     {
-        // Hook up the button click event automatically
         if (sendButton != null)
-        {
             sendButton.onClick.AddListener(OnSendButtonClicked);
-        }
+    }
+
+    void OnDestroy()
+    {
+        if (sendButton != null)
+            sendButton.onClick.RemoveListener(OnSendButtonClicked);
+    }
+
+    // Call this from your packing scripts whenever the task changes.
+    public void SetPackingState(string state)
+    {
+        if (!string.IsNullOrWhiteSpace(state))
+            packingState = state;
+    }
+
+    // Call this from a "I'm stuck" button, or from your own stuck timer.
+    public void OfferHint()
+    {
+        Ask("I am stuck. Use the current packing state and give me one hint for the next action.");
+    }
+
+    public void Ask(string playerText)
+    {
+        if (requestInFlight || string.IsNullOrWhiteSpace(playerText))
+            return;
+
+        StartCoroutine(SendChat(playerText.Trim()));
     }
 
     void OnSendButtonClicked()
     {
-        if (!string.IsNullOrEmpty(userInputField.text))
-        {
-            string playerText = userInputField.text;
-            userInputField.text = ""; // Clear input field
-            StartCoroutine(SendChatToGroq(playerText));
-        }
+        if (userInputField == null || string.IsNullOrWhiteSpace(userInputField.text))
+            return;
+
+        string playerText = userInputField.text;
+        userInputField.text = "";
+        Ask(playerText);
     }
 
-    public IEnumerator SendChatToGroq(string userPrompt)
+    IEnumerator SendChat(string playerText)
     {
-        responseText.text = "Thinking...";
+        requestInFlight = true;
+        if (sendButton != null)
+            sendButton.interactable = false;
+        if (responseText != null)
+            responseText.text = "Thinking...";
+
+        history.Add(new Message { role = "user", content = playerText });
+        TrimHistory();
+
+        var messages = new List<Message>
+        {
+            new Message
+            {
+                role = "system",
+                content = coachInstructions + "\n\nCurrent packing state:\n" + packingState
+            }
+        };
+        messages.AddRange(history);
 
         ChatRequest requestData = new ChatRequest
         {
-            model = "openai/gpt-oss-20b",
-            messages = new List<Message>
-            {
-                new Message { role = "system", content = "You are a helpful ai assistant ready to help the NASA team with what ever questions they might have." },
-                new Message { role = "user", content = userPrompt }
-            }
+            model = model,
+            messages = messages
         };
 
         string jsonBody = JsonUtility.ToJson(requestData);
 
         using (UnityWebRequest request = new UnityWebRequest(apiEndpoint, "POST"))
         {
-            byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonBody);
-            request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+            request.uploadHandler = new UploadHandlerRaw(Encoding.UTF8.GetBytes(jsonBody));
             request.downloadHandler = new DownloadHandlerBuffer();
-
+            request.timeout = 60;
             request.SetRequestHeader("Content-Type", "application/json");
             request.SetRequestHeader("Authorization", "Bearer " + apiKey);
 
@@ -74,17 +146,50 @@ public class GroqChatManager : MonoBehaviour
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                responseText.text = "Error connecting to AI.";
-                Debug.LogError(request.error);
+                history.RemoveAt(history.Count - 1);
+                if (responseText != null)
+                    responseText.text = "Error connecting to AI.";
+                Debug.LogError(request.responseCode + " " + request.error + "\n" + request.downloadHandler.text);
             }
             else
             {
                 ChatResponse responseObj = JsonUtility.FromJson<ChatResponse>(request.downloadHandler.text);
-                if (responseObj != null && responseObj.choices.Count > 0)
+                string answer = ReadAnswer(responseObj);
+                if (string.IsNullOrEmpty(answer))
                 {
-                    responseText.text = responseObj.choices[0].message.content;
+                    history.RemoveAt(history.Count - 1);
+                    if (responseText != null)
+                        responseText.text = "The AI reply could not be read.";
+                    Debug.LogError(request.downloadHandler.text);
+                }
+                else
+                {
+                    history.Add(new Message { role = "assistant", content = answer });
+                    TrimHistory();
+                    if (responseText != null)
+                        responseText.text = answer;
                 }
             }
         }
+
+        requestInFlight = false;
+        if (sendButton != null)
+            sendButton.interactable = true;
+    }
+
+    static string ReadAnswer(ChatResponse responseObj)
+    {
+        if (responseObj == null || responseObj.choices == null || responseObj.choices.Count == 0)
+            return null;
+        if (responseObj.choices[0].message == null)
+            return null;
+        return responseObj.choices[0].message.content;
+    }
+
+    void TrimHistory()
+    {
+        int extra = history.Count - maxHistoryMessages;
+        if (extra > 0)
+            history.RemoveRange(0, extra);
     }
 }
