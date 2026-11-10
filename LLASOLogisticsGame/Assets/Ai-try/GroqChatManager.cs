@@ -54,7 +54,7 @@ public class GroqChatManager : MonoBehaviour
             model = "openai/gpt-oss-20b",
             messages = new List<Message>
             {
-                new Message { role = "system", content = "You are a witty NPC in a video game." },
+                new Message { role = "system", content = "You are a helpful ai assistant ready to help the NASA team with what ever questions they might have." },
                 new Message { role = "user", content = userPrompt }
             }
         };
