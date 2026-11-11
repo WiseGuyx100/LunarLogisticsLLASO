@@ -16,6 +16,11 @@ public class FirstPersonPickup : MonoBehaviour
     [SerializeField] private float rotateSpeed = 120f;   // degrees per second while a key is held
     [SerializeField] private float settleSpeed = 360f;   // how fast it straightens inside the container
 
+    [Header("Box weight (uses each box's Rigidbody mass, in kg)")]
+    [SerializeField] private float lightMass = 5f;          // this heavy or less = full speed
+    [SerializeField] private float heavyMass = 60f;         // this heavy or more = slowest
+    [SerializeField, Range(0.05f, 1f)] private float heaviestSpeedMultiplier = 0.25f; // 0.25 = a quarter of normal speed
+
     [Header("Sliding into racks")]
     [SerializeField] private float slideTime = 0.4f;     // how long the slide takes (seconds)
 
@@ -32,6 +37,7 @@ public class FirstPersonPickup : MonoBehaviour
     private StorageZone[] racks;
     private Rigidbody slidingBody;
     private bool isRotatingByKey;
+    private float weightMultiplier = 1f;   // 1 = light box, smaller = heavier box
 
     private void Awake()
     {
@@ -114,7 +120,7 @@ public class FirstPersonPickup : MonoBehaviour
 
         // Move with physics so walls and floors can block it.
         Vector3 toTarget = targetPos - heldBody.position;
-        heldBody.linearVelocity = toTarget * followSpeed;
+        heldBody.linearVelocity = toTarget * followSpeed * weightMultiplier;
         heldBody.angularVelocity = Vector3.zero;
     }
 
@@ -140,7 +146,7 @@ public class FirstPersonPickup : MonoBehaviour
 
         isRotatingByKey = true;
 
-        float step = rotateSpeed * Time.deltaTime;
+        float step = rotateSpeed * weightMultiplier * Time.deltaTime;
         Quaternion r = heldBody.rotation;
         r = Quaternion.AngleAxis(turn * step, Vector3.up) * r;
         r = Quaternion.AngleAxis(tip * step, GetTipAxis()) * r;
@@ -235,6 +241,14 @@ public class FirstPersonPickup : MonoBehaviour
             return;
         }
 
+        // Only cargo boxes can be picked up (boxes have an ItemInfo on them)
+        ItemInfo boxInfo = targetBody.GetComponentInParent<ItemInfo>();
+        if (boxInfo == null)
+        {
+            Debug.Log("Pickup check: " + targetBody.name + " is not a cargo box, so it can't be picked up.");
+            return;
+        }
+
         // Still sliding into a rack? Wait until it stops.
         if (targetBody == slidingBody)
         {
@@ -243,6 +257,10 @@ public class FirstPersonPickup : MonoBehaviour
 
         heldBody = targetBody;
         isRotatingByKey = false;
+
+        // Heavier box = slower and sluggish to move and turn
+        float heaviness = Mathf.InverseLerp(lightMass, heavyMass, heldBody.mass);
+        weightMultiplier = Mathf.Lerp(1f, heaviestSpeedMultiplier, heaviness);
 
         // Remember the original settings so we can put them back.
         originalUseGravity = heldBody.useGravity;
