@@ -14,5 +14,14 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/TestGame/GameTest.unity
     guid: cadf9d32589040b4f8827ded399dabd1
+  - enabled: 1
+    path: Assets/LunarOutpost/Moon Test.unity
+    guid: ba85542d52064394d9b2aa6122425330
+  - enabled: 1
+    path: Assets/LunarOutpost/Lunar Service Level.unity
+    guid: 03634a8237e55304aa7213a06becf944
+  - enabled: 1
+    path: Assets/LunarOutpost/Lunar Flight Preview.unity
+    guid: d319f6c7d924c96428467c474306fd2f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

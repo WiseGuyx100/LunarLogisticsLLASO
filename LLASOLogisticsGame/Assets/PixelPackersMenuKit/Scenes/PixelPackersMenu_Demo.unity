@@ -166,7 +166,7 @@ MonoBehaviour:
   gameScene: GameTest
   tutorialScene: 
   timedScene: 
-  lunarScene: 
+  lunarScene: Moon Test
   multiplayerScene: 
   onControlSelected:
     m_PersistentCalls:
