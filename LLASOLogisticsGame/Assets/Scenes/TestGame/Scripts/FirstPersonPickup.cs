@@ -60,7 +60,7 @@ public class FirstPersonPickup : MonoBehaviour
 
     private void Update()
     {
-        if (interactAction.WasPressedThisFrame())
+        if (!AIHelper.IsChatOpen && interactAction.WasPressedThisFrame())
         {
             if (heldBody == null)
             {
@@ -261,6 +261,7 @@ public class FirstPersonPickup : MonoBehaviour
         SetIgnorePlayerCollision(true);
 
         Debug.Log("Pickup check: Picked up " + heldBody.name);
+        AIHelper.Report("Picked up " + AIHelper.Describe(heldBody.GetComponentInParent<ItemInfo>()));
 
         if (inspector != null)
         {
@@ -277,6 +278,7 @@ public class FirstPersonPickup : MonoBehaviour
 
         SetIgnorePlayerCollision(false);
 
+        ItemInfo droppedInfo = heldBody.GetComponentInParent<ItemInfo>();
         bool docked = false;
         Vector3 dockTarget = Vector3.zero;
 
@@ -309,6 +311,7 @@ public class FirstPersonPickup : MonoBehaviour
 
                 if (result == StorageZone.DockResult.DoesNotFit)
                 {
+                    AIHelper.Report("Tried to put " + AIHelper.Describe(droppedInfo) + " on a shelf but it DOES NOT FIT");
                     if (inspector != null)
                     {
                         inspector.ShowMessage(
@@ -354,6 +357,9 @@ public class FirstPersonPickup : MonoBehaviour
         {
             StartCoroutine(SlideRoutine(heldBody, dockTarget));
         }
+
+        if (docked) AIHelper.Report("Slid " + AIHelper.Describe(droppedInfo) + " into a rack");
+        else AIHelper.Report("Dropped " + AIHelper.Describe(droppedInfo));
 
         heldBody = null;
         heldColliders = null;

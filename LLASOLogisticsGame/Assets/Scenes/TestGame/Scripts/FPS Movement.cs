@@ -85,7 +85,7 @@ public class FPSMovement : MonoBehaviour
 
     private void Jump(InputAction.CallbackContext context)
     {
-        if (_isGrounded)
+        if (_isGrounded && !AIHelper.IsChatOpen)
         {
             _verticalVelocity = jumpForce;
         }
@@ -93,6 +93,7 @@ public class FPSMovement : MonoBehaviour
 
     private void Crouch(InputAction.CallbackContext context)
     {
+        if (AIHelper.IsChatOpen) return;
         if (_isCrouching)
         {
             if (!CanStandUp())
@@ -143,7 +144,8 @@ public class FPSMovement : MonoBehaviour
         right.y = 0f;
         right.Normalize();
 
-        Vector3 wishDirection = forward * _moveInput.y + right * _moveInput.x;
+        Vector2 input = AIHelper.IsChatOpen ? Vector2.zero : _moveInput;   // no walking while typing
+        Vector3 wishDirection = forward * input.y + right * input.x;
         wishDirection = Vector3.ClampMagnitude(wishDirection, 1f);   // a gentle stick push stays gentle
 
         // How fast do you want to go?

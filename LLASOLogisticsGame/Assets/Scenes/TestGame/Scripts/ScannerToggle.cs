@@ -25,7 +25,7 @@ public class ScannerToggle : MonoBehaviour
             "ToggleScanner",
             InputActionType.Button,
             "<Keyboard>/1");
-            toggleAction.AddBinding("<Gamepad>/buttonNorth");
+        toggleAction.AddBinding("<Gamepad>/buttonNorth");
     }
 
     void OnEnable()
@@ -60,9 +60,10 @@ public class ScannerToggle : MonoBehaviour
 
     void Update()
     {
-        if (toggleAction.WasPressedThisFrame())
+        if (!AIHelper.IsChatOpen && toggleAction.WasPressedThisFrame())
         {
             isEquipped = !isEquipped;
+            AIHelper.Report(isEquipped ? "Took out the scanner" : "Put the scanner away");
 
             // Show it right away so you can see it slide up
             if (isEquipped)

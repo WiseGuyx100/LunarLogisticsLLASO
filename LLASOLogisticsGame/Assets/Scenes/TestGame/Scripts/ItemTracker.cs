@@ -87,6 +87,7 @@ public class ItemTracker : MonoBehaviour
         // The box must be scanned with Q first
         if (!scanned.Contains(target))
         {
+            AIHelper.Report("Tried to store " + AIHelper.Describe(target) + " but had NOT scanned it with Q first");
             if (inspector != null)
             {
                 inspector.ShowMessage(
@@ -105,6 +106,7 @@ public class ItemTracker : MonoBehaviour
         // Has to be inside the cargo hold
         if (!inHold)
         {
+            AIHelper.Report("Tried to store " + AIHelper.Describe(target) + " but it is not inside the cargo hold");
             if (inspector != null)
             {
                 inspector.ShowMessage("NOT STORED\nThis item is not inside the cargo hold.");
@@ -125,6 +127,8 @@ public class ItemTracker : MonoBehaviour
 
         bool updated = records.ContainsKey(target);
         records[target] = r;
+        AIHelper.Report((updated ? "Updated the stored location of " : "Stored the location of ") + AIHelper.Describe(target) +
+            " at " + r.location + (r.wrongZone ? " (WRONG ZONE)" : " (zone is correct)"));
 
         string message =
             (updated ? "LOCATION UPDATED" : "LOCATION STORED") + "\n" +

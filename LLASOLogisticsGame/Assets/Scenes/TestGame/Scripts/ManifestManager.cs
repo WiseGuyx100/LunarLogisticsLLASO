@@ -37,7 +37,7 @@ public class ManifestManager : MonoBehaviour
         {
             panelOpen = !panelOpen;
             canvasGroup.alpha = panelOpen ? 1f : 0f;
-            if (panelOpen) Refresh();
+            if (panelOpen) { Refresh(); AIHelper.Report("Opened the manifest screen (showing Day " + currentDay + ")"); }
         }
 
         if (!panelOpen) return;
@@ -46,6 +46,7 @@ public class ManifestManager : MonoBehaviour
         if (GameControls.SwitchAppPressed())
         {
             appIndex = (appIndex + 1) % appNames.Length;
+            AIHelper.Report("Switched the manifest screen to the " + appNames[appIndex] + " app");
             Refresh();
         }
 
@@ -90,6 +91,7 @@ public class ManifestManager : MonoBehaviour
                 {
                     selectedIndex = Mathf.Clamp(selectedIndex, 0, count - 1);
                     ItemTracker.Instance.ToggleHighlight(list[selectedIndex].item);
+                    AIHelper.Report("Used Find on " + list[selectedIndex].id);
                     Refresh();
                 }
             }

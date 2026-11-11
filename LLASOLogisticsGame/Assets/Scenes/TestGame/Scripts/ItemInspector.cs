@@ -72,6 +72,7 @@ public class ItemInspector : MonoBehaviour
                 shownItem = target;
                 ShowLabel(target);
                 if (ItemTracker.Instance != null) ItemTracker.Instance.MarkScanned(target);
+                AIHelper.Report("Scanned " + AIHelper.Describe(target));
                 audioSource.PlayOneShot(scanSound, scanVolume);
             }
         }
@@ -84,7 +85,7 @@ public class ItemInspector : MonoBehaviour
         canvasGroup.alpha = 1f;
         audioSource.PlayOneShot(scanSound, scanVolume);
     }
-    
+
     void ShowLabel(ItemInfo item)
     {
         ItemData d = InventoryDatabase.Instance.Get(item.itemId);

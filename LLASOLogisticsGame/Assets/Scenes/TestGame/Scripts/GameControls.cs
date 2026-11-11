@@ -8,6 +8,7 @@ public static class GameControls
     // M  or  + button
     public static bool ManifestPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.mKey.wasPressedThisFrame)
@@ -17,6 +18,7 @@ public static class GameControls
     // Tab  or  - button
     public static bool SwitchAppPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.tabKey.wasPressedThisFrame)
@@ -26,6 +28,7 @@ public static class GameControls
     // ]  or  R
     public static bool NextPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.rightBracketKey.wasPressedThisFrame)
@@ -35,6 +38,7 @@ public static class GameControls
     // [  or  L
     public static bool PreviousPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.leftBracketKey.wasPressedThisFrame)
@@ -44,6 +48,7 @@ public static class GameControls
     // F  or  Y (left button)
     public static bool FindPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.fKey.wasPressedThisFrame)
@@ -53,6 +58,7 @@ public static class GameControls
     // Q  or  ZR
     public static bool ScanInfoPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.qKey.wasPressedThisFrame)
@@ -62,6 +68,7 @@ public static class GameControls
     // T  or  ZL
     public static bool StoreLocationPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.tKey.wasPressedThisFrame)
@@ -71,6 +78,7 @@ public static class GameControls
     // K  or  L and R together
     public static bool KeybindsPressed()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
 
@@ -87,6 +95,7 @@ public static class GameControls
 
     public static bool TurnRightHeld()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.rightArrowKey.isPressed)
@@ -95,6 +104,7 @@ public static class GameControls
 
     public static bool TurnLeftHeld()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.leftArrowKey.isPressed)
@@ -103,6 +113,7 @@ public static class GameControls
 
     public static bool TipUpHeld()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.upArrowKey.isPressed)
@@ -111,6 +122,7 @@ public static class GameControls
 
     public static bool TipDownHeld()
     {
+        if (AIHelper.IsChatOpen) return false;
         Keyboard k = Keyboard.current;
         Gamepad p = Gamepad.current;
         return (k != null && k.downArrowKey.isPressed)
