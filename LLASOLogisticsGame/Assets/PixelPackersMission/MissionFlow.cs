@@ -89,7 +89,6 @@ namespace PixelPackersMission
             var k=Keyboard.current;var mouse=Mouse.current;
             if(busy){if(k!=null&&k.escapeKey.wasPressedThisFrame)skip=true;return;}
             if(!hasLaunch||!rocket||!Application.CanStreamedLevelBeLoaded(Moon))return;
-            if(k!=null&&k.lKey.wasPressedThisFrame){StartCoroutine(Fly());return;}
             if(k!=null&&k.eKey.wasPressedThisFrame&&NearLaunchConsole()){StartCoroutine(Fly());return;}
             if(!CanStart())return;
             if((k!=null&&k.eKey.wasPressedThisFrame)||(mouse!=null&&mouse.leftButton.wasPressedThisFrame))
