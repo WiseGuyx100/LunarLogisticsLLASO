@@ -1,0 +1,13 @@
+Pixel Packers lunar mission update
+
+Earth launch model: SpaceX Starship Superheavy V3 by Ijsz23.
+https://sketchfab.com/3d-models/spacex-starship-superheavy-v3-12c91924d743465aac22f29ad8ba2e45
+Modified for the cutscene: reduced mesh detail and replaced preview materials.
+Keep the creator credit and check the source license before redistributing the model.
+
+Earth launch audio: NASA, STS-131: Sound of Launch.
+https://www.nasa.gov/historical-sounds/
+Latch, touchdown and bootstep: Kenney Impact Sounds, CC0.
+https://kenney.nl/assets/impact-sounds
+
+Requires the existing GameTest and Moon Test scenes. The mission and habitat additions initialize in Play mode; this package does not overwrite scene files or add an editor menu.
