@@ -221,16 +221,8 @@ namespace PixelPackersMission
             {
                 bool ready=Application.CanStreamedLevelBeLoaded(Moon);
                 var camera=Camera.main;
-                if(camera)
-                {
-                    var mark=camera.WorldToScreenPoint(pad+Vector3.up*4);
-                    if(mark.z>0&&mark.x>60&&mark.x<Screen.width-60&&mark.y>0&&mark.y<Screen.height)
-                        GUI.Box(new Rect(mark.x-60,Screen.height-mark.y-15,120,30),"LAUNCH PAD");
-                }
                 var button=new Rect(Screen.width-256,18,238,38);
                 if(!ready)GUI.Box(button,"Enable Moon Test in Build Profiles");
-                else if(Cursor.lockState==CursorLockMode.Locked)GUI.Box(button,"L  |  Launch to Moon");
-                else if(GUI.Button(button,"Launch to Moon [L]")&&!busy)StartCoroutine(Fly());
                 if(NearLaunchConsole()||CanStart())GUI.Box(new Rect(Screen.width/2-140,Screen.height-92,280,34),NearLaunchConsole()?"E  |  Use launch controls":"Click or press E to launch");
             }
         }
