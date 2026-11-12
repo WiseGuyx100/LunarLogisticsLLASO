@@ -21416,7 +21416,7 @@ MonoBehaviour:
   responseText: {fileID: 1226228663}
   sendButton: {fileID: 2135718905}
   hintText: {fileID: 0}
-  stuckSeconds: 90
+  stuckSeconds: 10
 --- !u!1 &1213811765
 GameObject:
   m_ObjectHideFlags: 0
