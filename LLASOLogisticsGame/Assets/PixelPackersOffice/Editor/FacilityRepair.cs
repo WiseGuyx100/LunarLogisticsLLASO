@@ -14,7 +14,7 @@ internal static partial class FacilityRepair
     const string Folder="Assets/PixelPackersOffice/Facility/";
     const string Assets=Folder+"RepairAssets/";
     const string Version="2026.11.14-r5";
-    [Serializable] class Surface { public string model,material; public bool texture,alpha,cutout; public float[] color; }
+    [Serializable] class Surface { public string model,material; public bool texture,alpha,cutout,pbr; public float metallic,roughness; public float[] color; }
     [Serializable] class Manifest { public Surface[] surfaces; }
     static Manifest manifest;
     static List<string> report;
@@ -216,6 +216,8 @@ internal static partial class FacilityRepair
             var m=NewMaterial(s.material);
             if(s.texture)m.SetTexture("_BaseMap",Texture(Assets+s.material+"_Base.png"));
             else if(s.color!=null&&s.color.Length>=3)m.SetColor("_BaseColor",new Color(s.color[0],s.color[1],s.color[2]));
+            if(s.pbr){m.SetFloat("_Metallic",s.metallic);m.SetFloat("_Smoothness",1-s.roughness);}
+            if(File.Exists(Assets+s.material+"_Normal.png")){m.SetTexture("_BumpMap",Texture(Assets+s.material+"_Normal.png",true));m.EnableKeyword("_NORMALMAP");m.SetFloat("_BumpScale",.65f);}
             if(name=="ArmstrongR5"&&s.material=="ArmstrongR5_Surface_0")
             {
                 m.SetTexture("_BumpMap",Texture(Folder+"cotton_jersey_nor_gl_1k.jpg",true));m.EnableKeyword("_NORMALMAP");m.SetFloat("_BumpScale",.12f);m.SetTextureScale("_BaseMap",new Vector2(18,6));m.SetFloat("_Smoothness",.12f);

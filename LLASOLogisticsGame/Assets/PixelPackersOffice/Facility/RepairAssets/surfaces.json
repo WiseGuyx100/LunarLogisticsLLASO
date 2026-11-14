@@ -337,6 +337,246 @@
         0.1843000054359436,
         1.0
       ]
+    },
+    {
+      "model": "BollardR6",
+      "material": "BollardR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.6
+    },
+    {
+      "model": "DeskLampR6",
+      "material": "DeskLampR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "DeskLampR6",
+      "material": "DeskLampR6_Surface_1",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "ExtinguisherR6",
+      "material": "ExtinguisherR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "FireAlarmR6",
+      "material": "FireAlarmR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "FirstAidR6",
+      "material": "FirstAidR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "OfficeChairR6",
+      "material": "OfficeChairR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "FilingCabinetR6",
+      "material": "FilingCabinetR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.6
+    },
+    {
+      "model": "PowerBoxR6",
+      "material": "PowerBoxR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.6
+    },
+    {
+      "model": "SecurityCameraR6",
+      "material": "SecurityCameraR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "SecurityCameraR6",
+      "material": "SecurityCameraR6_Surface_1",
+      "texture": true,
+      "alpha": true,
+      "cutout": true,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "LaunchButtonR6",
+      "material": "LaunchButtonR6_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "LaunchButtonR6",
+      "material": "LaunchButtonR6_Surface_1",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "LaunchButtonR6",
+      "material": "LaunchButtonR6_Surface_2",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
+    },
+    {
+      "model": "LaunchButtonR6",
+      "material": "LaunchButtonR6_Surface_3",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ],
+      "pbr": true,
+      "roughness": 0.55,
+      "metallic": 0.15
     }
   ]
 }

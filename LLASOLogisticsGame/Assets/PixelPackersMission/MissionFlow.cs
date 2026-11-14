@@ -79,8 +79,15 @@ namespace PixelPackersMission
             var approach=Vector3.ProjectOnPlane(pad-playCamera.transform.position,Vector3.up).normalized;
             launchConsole=playCamera.transform.position+approach*2.2f;
             launchConsole.y=Ground(launchConsole,terrain,playCamera.transform.position.y-1.6f);
-            Piece(dock.transform,"Launch control pedestal",PrimitiveType.Cube,launchConsole+Vector3.up*.50f,new Vector3(.32f,1,.32f),dark,false);
-            Piece(dock.transform,"Launch control button",PrimitiveType.Cube,launchConsole+Vector3.up*1.03f,new Vector3(.40f,.10f,.31f),bright,false);
+            var installedConsole=GameObject.Find("Rocket launch controls R7");
+            if(installedConsole){var p=installedConsole.transform.position;p.y=Ground(p,terrain,launchConsole.y);installedConsole.transform.position=p;launchConsole=p;}
+            else
+            {
+                Piece(dock.transform,"Launch control pedestal",PrimitiveType.Cube,launchConsole+Vector3.up*.50f,new Vector3(.32f,1,.32f),dark,false);
+                var downloadedButton=Resources.Load<GameObject>("PixelPackersMission/LaunchButtonR7")??Resources.Load<GameObject>("PixelPackersMission/LaunchButtonR6");
+                if(downloadedButton){var button=Instantiate(downloadedButton,dock.transform);button.name="Downloaded industrial launch button";button.transform.position=launchConsole+Vector3.up;}
+                else{var red=Surface("Launch red button",new Color(.7f,.025f,.015f),.3f);Piece(dock.transform,"Round launch button",PrimitiveType.Cylinder,launchConsole+Vector3.up*1.06f,new Vector3(.22f,.06f,.22f),red,false);}
+            }
             hasLaunch=true;
         }
 
@@ -302,6 +309,7 @@ namespace PixelPackersMission
         }
     }
 }
+
 
 
 
