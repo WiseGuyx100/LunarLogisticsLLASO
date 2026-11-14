@@ -1,0 +1,60 @@
+newmtl Fac_White
+Kd 0.94 0.95 0.97
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_Grey
+Kd 0.50 0.53 0.58
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_DarkBlue
+Kd 0.05 0.12 0.33
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_Purple
+Kd 0.38 0.24 0.66
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_LightBlue
+Kd 0.50 0.78 0.96
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_Green
+Kd 0.18 0.78 0.42
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_DarkSteel
+Kd 0.14 0.15 0.18
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_Roof
+Kd 0.78 0.80 0.84
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_Glass
+Kd 0.62 0.84 0.97
+Ka 0 0 0
+Ks 0 0 0
+d 0.30
+Tr 0.70
+
+newmtl Fac_Floor
+Kd 0.70 0.72 0.76
+Ka 0 0 0
+Ks 0 0 0
+
+newmtl Fac_Light
+Kd 0.98 0.98 1.00
+Ka 0 0 0
+Ks 0 0 0
+
+
+newmtl Fac_PathMark
+Kd 0.26 0.48 0.65

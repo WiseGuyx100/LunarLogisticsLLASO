@@ -97,7 +97,7 @@ namespace PixelPackersMission
                     Door(lab,-8.05f,front-.15f,2.07f,2.44f);
                     WallBand(lab,left,right,3.24f,top,front,.22f,trim);
                     WallBand(lab,-6.5f,right,.11f,3.25f,front,.22f,trim);
-                    Box(lab,"NASA model enclosure roof",new Vector3((left+right)*.5f,top+.14f,(front+rear)*.5f),new Vector3(right-left+.24f,.28f,rear-front+.24f),deck);
+                    if(!lab.Find("NASA model enclosure roof"))Box(lab,"NASA model enclosure roof",new Vector3((left+right)*.5f,top+.14f,(front+rear)*.5f),new Vector3(right-left+.24f,.28f,rear-front+.24f),deck);
                     foreach(float z in new[]{front+3,rear-3})
                     {
                         var light=Box(lab,"Enclosure overhead light",new Vector3((left+right)*.5f,top-.12f,z),new Vector3(3,.1f,.3f),line,false).AddComponent<Light>();
@@ -117,7 +117,7 @@ namespace PixelPackersMission
                 WallBand(cargo,center-3.3f,center+3.3f,2.68f,3.35f,front,.21f,trim);
                 Window(cargo,center-3.3f,center+3.3f,1.04f,2.68f,front);
             }
-            Box(cargo,"Cargo bay roof",new Vector3(16,3.34f,4),new Vector3(18.35f,.24f,17.30f),deck);
+            if(!cargo.Find("Cargo bay roof"))Box(cargo,"Cargo bay roof",new Vector3(16,3.34f,4),new Vector3(18.35f,.24f,17.30f),deck);
             for(int i=0;i<4;i++)
             {
                 float z=-3+i*4.2f;
@@ -356,6 +356,8 @@ namespace PixelPackersMission
         }
     }
 }
+
+
 
 
 

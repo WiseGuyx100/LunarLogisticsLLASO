@@ -1,0 +1,225 @@
+{
+  "surfaces": [
+    {
+      "model": "FirTree",
+      "material": "FirTree_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.10874480754137039,
+        0.07536032795906067,
+        0.04797831550240517,
+        1.0
+      ]
+    },
+    {
+      "model": "FirTree",
+      "material": "FirTree_Surface_1",
+      "texture": true,
+      "alpha": false,
+      "cutout": true,
+      "color": [
+        0.10559049248695374,
+        0.07075172662734985,
+        0.0425400473177433,
+        1.0
+      ]
+    },
+    {
+      "model": "FirTree",
+      "material": "FirTree_Surface_2",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "NorwaySpruce",
+      "material": "NorwaySpruce_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": true,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "NorwaySpruce",
+      "material": "NorwaySpruce_Surface_1",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "PineTree",
+      "material": "PineTree_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.10874480754137039,
+        0.07536032795906067,
+        0.04797831550240517,
+        1.0
+      ]
+    },
+    {
+      "model": "PineTree",
+      "material": "PineTree_Surface_1",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.2115810066461563,
+        0.10477200150489807,
+        0.08009800314903259,
+        1.0
+      ]
+    },
+    {
+      "model": "PineTree",
+      "material": "PineTree_Surface_2",
+      "texture": true,
+      "alpha": false,
+      "cutout": true,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "PineTree",
+      "material": "PineTree_Surface_3",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "RoundDuct",
+      "material": "RoundDuct_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "CeilingLight",
+      "material": "CeilingLight_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": true,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "Cables",
+      "material": "Cables_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "ToolChest",
+      "material": "ToolChest_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.24654006958007812,
+        0.03060130961239338,
+        0.031936731189489365,
+        1.0
+      ]
+    },
+    {
+      "model": "Toolbox",
+      "material": "Toolbox_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "Compressor",
+      "material": "Compressor_Surface_0",
+      "texture": true,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "Compressor",
+      "material": "Compressor_Surface_1",
+      "texture": true,
+      "alpha": true,
+      "cutout": true,
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "CableTray",
+      "material": "CableTray_Surface_0",
+      "texture": false,
+      "alpha": false,
+      "cutout": false,
+      "color": [
+        0.792156994342804,
+        0.8196079730987549,
+        0.9333329796791077,
+        1.0
+      ]
+    }
+  ]
+}

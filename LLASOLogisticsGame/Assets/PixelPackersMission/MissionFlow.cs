@@ -116,9 +116,9 @@ namespace PixelPackersMission
             var clip=Resources.Load<AudioClip>("PixelPackersMission/Launch");
             if(clip){audioTrack.clip=clip;audioTrack.volume=.66f;audioTrack.Play();}
             SuspendPlayer();
-            var plume=Particles(rocket.transform,"Engine exhaust",new Color(1,.41f,.08f),true);
+            RocketExhaust.Create(rocket.transform);
             var smoke=Particles(rocket.transform,"Pad smoke",new Color(.64f,.63f,.61f),false); smoke.transform.SetParent(rocket.transform.parent,true);
-            plume.Play();smoke.Play();
+            smoke.Play();
             var openingEye=pad+new Vector3(0,1.65f,-9);
             for(int i=0;i<8;i++)
             {
