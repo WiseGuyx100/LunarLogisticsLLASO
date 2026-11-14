@@ -9,17 +9,17 @@ using UnityEditor.SceneManagement;
 using Object = UnityEngine.Object;
 
 // Repairs visuals only. Existing facility meshes/colliders and cargo are retained.
-internal static class FacilityRepair
+internal static partial class FacilityRepair
 {
     const string Folder="Assets/PixelPackersOffice/Facility/";
     const string Assets=Folder+"RepairAssets/";
-    const string Version="2026.11.14-r4";
+    const string Version="2026.11.14-r5";
     [Serializable] class Surface { public string model,material; public bool texture,alpha,cutout; public float[] color; }
     [Serializable] class Manifest { public Surface[] surfaces; }
     static Manifest manifest;
     static List<string> report;
 
-    [MenuItem("Tools/Pixel Packers/Repair Facility and Trees (R4)")]
+    [MenuItem("Tools/Pixel Packers/Repair Facility and Trees (R5)")]
     public static void RepairAll()=>Run(true,true);
     public static void RepairFacility()=>Run(true,false);
     public static void RepairTrees()=>Run(false,true);
@@ -41,6 +41,7 @@ internal static class FacilityRepair
                 Texture(path.Replace('\\','/'),path.Contains("_nor_gl"));
             if(facility)FixFacility(scene);
             if(facility)PrepareLaunchFlame();
+            if(facility)InstallOfficeInteractions();
             if(trees)FixTrees(scene);
             AssetDatabase.SaveAssets();EditorSceneManager.MarkSceneDirty(scene);
             Undo.CollapseUndoOperations(undo);
@@ -73,7 +74,7 @@ internal static class FacilityRepair
         m.SetShaderPassEnabled("ShadowCaster",true);m.enableInstancing=true;
         EditorUtility.SetDirty(m);return m;
     }
-    [MenuItem("Tools/Pixel Packers/Upgrade Moon Rooms (R4)")]
+    [MenuItem("Tools/Pixel Packers/Upgrade Moon Rooms (R5)")]
     public static void UpgradeMoon()
     {
         var scene=SceneManager.GetActiveScene();
@@ -84,6 +85,8 @@ internal static class FacilityRepair
         {
             manifest=JsonUtility.FromJson<Manifest>(File.ReadAllText(Assets+"surfaces.json"));
             GameTestOffice.LunarRooms();
+            RepairSuitBays();
+            AddSmallRockColliders(scene);
             var power=GameObject.Find("Equipment and power annex");
             if(!power)throw new Exception("Equipment and power annex not found.");
             var previous=power.transform.Find("Downloaded equipment R4");
@@ -96,7 +99,7 @@ internal static class FacilityRepair
             var dark=NewMaterial("Room mounting metal");dark.SetColor("_BaseColor",new Color(.16f,.2f,.23f));
             foreach(float z in new[]{29.3f,32f})foreach(float x in new[]{4.4f,9.1f})
                 Support(root.transform,new Vector3(x,2.96f,z),new Vector3(.035f,.7f,.035f),dark);
-            PlaceProp("Cables",root.transform,cable,new Vector3(8.8f,.18f,32.2f),1.1f);
+            RouteRackCables(root.transform);
             PlaceProp("ToolChest",root.transform,ModelMaterials("ToolChest"),new Vector3(-3.5f,.14f,31.8f),1.05f);
             PlaceProp("Compressor",root.transform,ModelMaterials("Compressor"),new Vector3(-.6f,.14f,31.8f),.9f);
             PlaceProp("Toolbox",root.transform,ModelMaterials("Toolbox"),new Vector3(-7.4f,1.2f,31f),.3f);
@@ -126,7 +129,7 @@ internal static class FacilityRepair
         var g=Instance(name,root,mats);var b=BoundsOf(g);g.transform.localScale*=height/Mathf.Max(.01f,b.size.y);b=BoundsOf(g);
         g.transform.position+=root.TransformPoint(floor)-new Vector3(b.center.x,b.min.y,b.center.z);
     }
-    [MenuItem("Tools/Pixel Packers/Connect Downloaded Launch Flame (R4)")]
+    [MenuItem("Tools/Pixel Packers/Connect Downloaded Launch Flame (R5)")]
     public static void PrepareLaunchFlame()
     {
         const string src="Assets/Solodream/VFX_FlamePack/Prefabs/Flame_02.prefab";
@@ -189,8 +192,9 @@ internal static class FacilityRepair
         if(name=="Fac_PathMark")m.SetFloat("_Metallic",0);
         if(name=="Fac_Purple"||name=="Fac_Grey"||name=="Fac_Green")
         {
-            m.SetTexture("_BaseMap",Texture(Folder+"blue_metal_plate_diff_2k.jpg"));
-            m.SetTexture("_BumpMap",Texture(Folder+"blue_metal_plate_nor_gl_2k.exr",true));
+            m.SetTexture("_BaseMap",Texture(Folder+"painted_plaster_wall_diff_2k.jpg"));
+            m.SetTexture("_BumpMap",Texture(Folder+"painted_plaster_wall_nor_gl_2k.jpg",true));
+            m.SetFloat("_Metallic",0);m.SetFloat("_Smoothness",.15f);
             m.EnableKeyword("_NORMALMAP");m.SetFloat("_BumpScale",.18f);
             m.SetTextureScale("_BaseMap",Vector2.one*.35f);
             m.SetColor("_BaseColor",new Color(.72f,.75f,.77f));
@@ -212,6 +216,10 @@ internal static class FacilityRepair
             var m=NewMaterial(s.material);
             if(s.texture)m.SetTexture("_BaseMap",Texture(Assets+s.material+"_Base.png"));
             else if(s.color!=null&&s.color.Length>=3)m.SetColor("_BaseColor",new Color(s.color[0],s.color[1],s.color[2]));
+            if(name=="ArmstrongR5"&&s.material=="ArmstrongR5_Surface_0")
+            {
+                m.SetTexture("_BumpMap",Texture(Folder+"cotton_jersey_nor_gl_1k.jpg",true));m.EnableKeyword("_NORMALMAP");m.SetFloat("_BumpScale",.12f);m.SetTextureScale("_BaseMap",new Vector2(18,6));m.SetFloat("_Smoothness",.12f);
+            }
             if(s.cutout)
             {
                 m.SetFloat("_AlphaClip",1);m.SetFloat("_Cutoff",.35f);m.EnableKeyword("_ALPHATEST_ON");
@@ -294,6 +302,7 @@ internal static class FacilityRepair
         });
         var mats=surfaces.ToDictionary(n=>n,Finish);
         var lightMats=ModelMaterials("CeilingLight");var ductMats=ModelMaterials("RoundDuct");
+        foreach(var m in lightMats.Values){m.EnableKeyword("_EMISSION");m.SetTexture("_EmissionMap",m.GetTexture("_BaseMap"));m.SetColor("_EmissionColor",new Color(.65f,.62f,.55f));}
         var root=new GameObject("Facility repaired R2");root.transform.SetParent(original.transform,false);Undo.RegisterCreatedObjectUndo(root,"Repair facility");
         foreach(var name in surfaces)
         {
@@ -318,21 +327,28 @@ internal static class FacilityRepair
         foreach(float x in new[]{-8f,8f})foreach(float z in new[]{10f,22f,34f,46f})
         {
             PlaceDetail("CeilingLight",root.transform,lightMats,new Vector3(x,8.9f,z),2.4f);
+            var fixture=root.transform.GetChild(root.transform.childCount-1);
+            var center=BoundsOf(fixture.gameObject).center;
+            fixture.localRotation*=Quaternion.Euler(0,0,180);
+            fixture.position+=center-BoundsOf(fixture.gameObject).center;
+            DownLight(root.transform,new Vector3(x,8.77f,z),4.5f,16,100);
             foreach(float dz in new[]{-.8f,.8f})Hang(new Vector3(x,8.98f,z+dz));
         }
-        foreach(float z in new[]{7f,15f,23f,31f,39f,47f})
+        foreach(float ductX in new[]{-13f,13f})foreach(float z in new[]{7f,15f,23f,31f,39f,47f})
         {
-            PlaceDetail("RoundDuct",root.transform,ductMats,new Vector3(13f,8.45f,z),8f);
+            PlaceDetail("RoundDuct",root.transform,ductMats,new Vector3(ductX,8.45f,z),8f);
             foreach(float dz in new[]{-3.7f,3.7f})
             {
-                Support(root.transform,new Vector3(13,8.16f,z+dz),new Vector3(.8f,.06f,.1f),mats["Fac_DarkSteel"]);
-                foreach(float dx in new[]{-.34f,.34f})Hang(new Vector3(13+dx,8.19f,z+dz));
+                Support(root.transform,new Vector3(ductX,8.16f,z+dz),new Vector3(.8f,.06f,.1f),mats["Fac_DarkSteel"]);
+                foreach(float dx in new[]{-.34f,.34f})Hang(new Vector3(ductX+dx,8.19f,z+dz));
             }
         }
+        ReplaceTrusses(root.transform,meshes["Fac_DarkSteel"],roofProbe,mats["Fac_DarkSteel"]);
         Object.DestroyImmediate(roofProbe);
+        SetDaylight();
         foreach(var t in original.transform.Cast<Transform>().Where(t=>t!=root.transform&&(t.name=="Detailed facility finish"||t.name=="Facility repaired R2")).ToArray())Undo.DestroyObjectImmediate(t.gameObject);
         var old=original.GetComponent<Renderer>();Undo.RecordObject(old,"Hide original facility visuals");old.enabled=false;
-        report.Add("Facility: textured wall panels, 8 mounted lights, connected round duct with support brackets. Existing roof trusses retained pending downloaded replacement.");
+        report.Add("Facility: textured wall panels, 8 mounted lights, connected round duct with support brackets. Downloaded dark steel trusses replace upper original trusses.");
     }
     static void PlaceDetail(string name,Transform parent,Dictionary<string,Material> mats,Vector3 center,float length)
     {
@@ -353,7 +369,7 @@ internal static class FacilityRepair
         var local=LocalBounds();
         if(local.size.x>local.size.z)g.transform.localRotation=Quaternion.Euler(0,90,0);
         local=LocalBounds();
-        float width=name=="RoundDuct"?.52f:.38f,height=name=="RoundDuct"?.52f:.16f;
+        float width=name=="HeavyTruss"?.60f:name=="RoundDuct"?.52f:.38f,height=name=="HeavyTruss"?1.35f:name=="RoundDuct"?.52f:.16f;
         g.transform.localScale=new Vector3(width/Mathf.Max(.001f,local.size.x),height/Mathf.Max(.001f,local.size.y),length/Mathf.Max(.001f,local.size.z));
         // The exported fixtures run along Z; scale in parent axes via an extra holder
         // when a source has needed a quarter turn.

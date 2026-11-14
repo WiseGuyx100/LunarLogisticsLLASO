@@ -16,6 +16,23 @@ public sealed class OutpostTour : MonoBehaviour
     public float cruiseSpeed=7.5f, boostSpeed=15f, boostBuildSeconds=4f, maxRockStep=1.0f;
     Vector3 roverCenter, roverHalf;
     static readonly RaycastHit[] groundHits=new RaycastHit[24];
+    float suspension;
+    static bool IsRock(Transform t){while(t){if(t.name=="Original lunar rock")return true;t=t.parent;}return false;}
+    float RockRise(Vector3 position,Quaternion rotation)
+    {
+        float rise=0;
+        // Sample the footprint, including the leading edge, before the chassis touches a stone.
+        foreach(var c in Physics.OverlapBox(position+Vector3.up*.5f,new Vector3(roverHalf.x+.25f,1.1f,roverHalf.z+.35f),rotation,~0,QueryTriggerInteraction.Ignore))
+        {
+            if(!IsRock(c.transform)||c.bounds.size.y>Mathf.Min(.65f,maxRockStep))continue;
+            var local=Quaternion.Inverse(rotation)*(c.bounds.center-position);
+            float dz=Mathf.Max(0,Mathf.Abs(local.z)-roverHalf.z*.65f-c.bounds.extents.z);
+            float dx=Mathf.Max(0,Mathf.Abs(local.x)-roverHalf.x*.8f-c.bounds.extents.x);
+            float contact=1-Mathf.Clamp01(Mathf.Max(dx,dz)/.5f);
+            rise=Mathf.Max(rise,c.bounds.size.y*Mathf.SmoothStep(0,1,contact));
+        }
+        return rise;
+    }
 
     void MeasureRover()
     {
@@ -39,7 +56,10 @@ public sealed class OutpostTour : MonoBehaviour
     {
         foreach(var c in Physics.OverlapBox(position+rotation*roverCenter,roverHalf,rotation,~0,QueryTriggerInteraction.Ignore))
             if(!(c is TerrainCollider)&&!c.transform.IsChildOf(transform)&&!c.transform.IsChildOf(view.transform.parent))
+            {
+                if(IsRock(c.transform)&&c.bounds.size.y<=Mathf.Min(.65f,maxRockStep))continue;
                 return true;
+            }
         return false;
     }
 
@@ -51,7 +71,7 @@ public sealed class OutpostTour : MonoBehaviour
         for(int i=0;i<count;i++)
         {
             var hit=groundHits[i];
-            if(hit.normal.y<.5f||hit.point.y>transform.position.y+maxRockStep||
+            if((driving&&IsRock(hit.transform)&&hit.collider.bounds.size.y<=Mathf.Min(.65f,maxRockStep))||hit.normal.y<.5f||hit.point.y>transform.position.y+maxRockStep||
                hit.transform.IsChildOf(transform)||hit.transform.IsChildOf(view.transform.parent))continue;
             height=Mathf.Max(height,hit.point.y);
         }
@@ -109,6 +129,9 @@ public sealed class OutpostTour : MonoBehaviour
                     var probe=next+turn*new Vector3(side*roverHalf.x,0,fore*roverHalf.z);
                     next.y=Mathf.Max(next.y,Ground(probe));
                 }
+                float rise=RockRise(next,turn);
+                suspension=Mathf.MoveTowards(suspension,rise,step*3.0f);
+                next.y+=suspension;
                 if(Mathf.Abs(next.x)>=104||Mathf.Abs(next.z)>=100||Blocked(next,turn)){bump=Mathf.Abs(speed);speed=0;break;}
                 transform.SetPositionAndRotation(next,turn);
             }

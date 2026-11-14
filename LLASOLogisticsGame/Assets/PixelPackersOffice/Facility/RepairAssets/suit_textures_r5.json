@@ -1,0 +1,367 @@
+{
+  "surfaces": [
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "lambert2",
+      "texture": "SuitR5_0",
+      "color": [
+        0.5,
+        0.5,
+        0.5,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Dark_Al1",
+      "texture": "SuitR5_1",
+      "color": [
+        0.1843000054359436,
+        0.1843000054359436,
+        0.1843000054359436,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Dark_Blue_Metal1",
+      "texture": "SuitR5_2",
+      "color": [
+        0.0,
+        0.0,
+        0.9607999920845032,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Gold_Metal1",
+      "texture": "SuitR5_3",
+      "color": [
+        0.7922000288963318,
+        0.8626999855041504,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Light_Blue_Metal1",
+      "texture": "SuitR5_4",
+      "color": [
+        0.5529000163078308,
+        0.9097999930381775,
+        0.8980000019073486,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Med_AL1",
+      "texture": "SuitR5_5",
+      "color": [
+        0.5059000253677368,
+        0.5059000253677368,
+        0.5059000253677368,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Red_Metal1",
+      "texture": "SuitR5_6",
+      "color": [
+        1.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "model": "Armstrong Apollo Suit",
+      "material": "suit_150k_sd2_HardSurface:Shiny_AL1",
+      "texture": "SuitR5_7",
+      "color": [
+        0.8077999949455261,
+        0.8077999949455261,
+        0.8077999949455261,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_blinn12SG",
+      "texture": "SuitR5_8",
+      "color": [
+        0.7699999809265137,
+        0.36000001430511475,
+        0.14000000059604645,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_blinn1SG",
+      "texture": "SuitR5_9",
+      "color": [
+        0.6899999976158142,
+        0.41999998688697815,
+        0.2199999988079071,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_blinn2SG",
+      "texture": "SuitR5_10",
+      "color": [
+        0.6000000238418579,
+        0.6000000238418579,
+        0.6000000238418579,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_blinn3SG",
+      "texture": "SuitR5_11",
+      "color": [
+        0.5,
+        0.3799999952316284,
+        0.14000000059604645,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_body_lambert2SG",
+      "texture": "SuitR5_12",
+      "color": [
+        0.8199999928474426,
+        0.8299999833106995,
+        0.8999999761581421,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit4_justbody_blinn3SG",
+      "texture": "SuitR5_13",
+      "color": [
+        0.6200000047683716,
+        0.47999998927116394,
+        0.17000000178813934,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit4_justbody_lambert2SG",
+      "texture": "SuitR5_14",
+      "color": [
+        0.9300000071525574,
+        0.9300000071525574,
+        0.9300000071525574,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_blinn1SG",
+      "texture": "SuitR5_15",
+      "color": [
+        0.6899999976158142,
+        0.41999998688697815,
+        0.2199999988079071,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_blinn2SG",
+      "texture": "SuitR5_16",
+      "color": [
+        0.6000000238418579,
+        0.6000000238418579,
+        0.6000000238418579,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_blinn3SG",
+      "texture": "SuitR5_17",
+      "color": [
+        0.5,
+        0.3799999952316284,
+        0.14000000059604645,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_jetpack2SG",
+      "texture": "SuitR5_18",
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_lambert2SG",
+      "texture": "SuitR5_19",
+      "color": [
+        0.9300000071525574,
+        0.9300000071525574,
+        0.9300000071525574,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_lambert3SG",
+      "texture": "SuitR5_20",
+      "color": [
+        0.75,
+        0.25999999046325684,
+        0.10999999940395355,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_emusuit5_lambert5SG",
+      "texture": "SuitR5_21",
+      "color": [
+        0.4099999964237213,
+        0.30000001192092896,
+        0.27000001072883606,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_jetpack2SG",
+      "texture": "SuitR5_22",
+      "color": [
+        0.949999988079071,
+        0.9399999976158142,
+        0.9300000071525574,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert10SG",
+      "texture": "SuitR5_23",
+      "color": [
+        0.9200000166893005,
+        0.9200000166893005,
+        0.9200000166893005,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert11SG",
+      "texture": "SuitR5_24",
+      "color": [
+        0.6700000166893005,
+        0.44999998807907104,
+        0.3799999952316284,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert2SG",
+      "texture": "SuitR5_25",
+      "color": [
+        0.9300000071525574,
+        0.9300000071525574,
+        0.9300000071525574,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert3SG",
+      "texture": "SuitR5_26",
+      "color": [
+        0.9200000166893005,
+        0.7200000286102295,
+        0.6600000262260437,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert4SG",
+      "texture": "SuitR5_27",
+      "color": [
+        0.9399999976158142,
+        0.14000000059604645,
+        0.1599999964237213,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert5SG",
+      "texture": "SuitR5_28",
+      "color": [
+        0.8600000143051147,
+        0.8399999737739563,
+        0.8399999737739563,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert7SG",
+      "texture": "SuitR5_29",
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert8SG",
+      "texture": "SuitR5_30",
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:emusuit21_lambert9SG",
+      "texture": "SuitR5_31",
+      "color": [
+        0.800000011920929,
+        0.800000011920929,
+        0.800000011920929,
+        1.0
+      ]
+    },
+    {
+      "model": "NASA EMU",
+      "material": "EMU:initialShadingGroup",
+      "texture": "SuitR5_32",
+      "color": [
+        0.5,
+        0.5,
+        0.5,
+        1.0
+      ]
+    }
+  ]
+}

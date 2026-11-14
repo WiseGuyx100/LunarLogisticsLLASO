@@ -5968,7 +5968,7 @@ Transform:
   m_GameObject: {fileID: 413251950}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 8.9, y: 0.02, z: 4.65}
+  m_LocalPosition: {x: 8.3, y: 0.02, z: 5.1}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -11614,8 +11614,8 @@ Transform:
   m_GameObject: {fileID: 809380359}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.05, y: 1.32, z: 7.45}
-  m_LocalScale: {x: 5.7, y: 2.6, z: 0.14}
+  m_LocalPosition: {x: 8.1, y: 1.4, z: 7.7}
+  m_LocalScale: {x: 5.55, y: 2.8, z: 0.14}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 281728146}
@@ -15602,7 +15602,7 @@ Transform:
   m_GameObject: {fileID: 1137514966}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 9.84036, y: 0.025, z: 9.65}
+  m_LocalPosition: {x: 9.83036, y: 0.024999905, z: 9.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -16908,7 +16908,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -8.85, y: 1.27, z: 7}
-  m_LocalScale: {x: 4.1, y: 2.5, z: 0.14}
+  m_LocalScale: {x: 3.4, y: 2.5, z: 0.14}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 984107459}
@@ -17020,7 +17020,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 10.62, y: 1.68, z: 9.65}
-  m_LocalScale: {x: 0.14, y: 3.1, z: 2.35}
+  m_LocalScale: {x: 0.14, y: 3.1, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 281728146}
@@ -21448,8 +21448,8 @@ Transform:
   m_GameObject: {fileID: 1586073714}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 8.9, y: 0.032, z: 4.65}
-  m_LocalScale: {x: 2, y: 0.024, z: 1.6}
+  m_LocalPosition: {x: 8.3, y: 0.032, z: 5.1}
+  m_LocalScale: {x: 2.4, y: 0.024, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 281728146}
@@ -28686,6 +28686,10 @@ MonoBehaviour:
   rover: 0
   launch: 0
   movingPart: {fileID: 11029825}
+  cruiseSpeed: 7.5
+  boostSpeed: 15
+  boostBuildSeconds: 4
+  maxRockStep: 1
 --- !u!1 &2038000328
 GameObject:
   m_ObjectHideFlags: 0
