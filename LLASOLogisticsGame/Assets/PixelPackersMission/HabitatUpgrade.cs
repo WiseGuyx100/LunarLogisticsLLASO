@@ -321,47 +321,13 @@ namespace PixelPackersMission
     {
         internal Transform left,right;
         internal float travel;
-        Vector3 leftClosed,rightClosed;
-        bool open;
-        float amount;
-        AudioSource sound;
         void Start()
         {
-            leftClosed=left.localPosition;rightClosed=right.localPosition;
-            sound=gameObject.AddComponent<AudioSource>();sound.spatialBlend=1;sound.volume=.37f;
-            sound.clip=Resources.Load<AudioClip>("PixelPackersMission/DoorLatch");
-        }
-        bool Nearby()
-        {
-            var camera=Camera.main;
-            if(!camera||Vector3.Distance(camera.transform.position,transform.position+Vector3.up*1.3f)>2.5f)return false;
-            return Vector3.Dot(camera.transform.forward,(transform.position+Vector3.up*1.3f-camera.transform.position).normalized)>.20f;
-        }
-        void Update()
-        {
-            if(Keyboard.current!=null&&Keyboard.current.eKey.wasPressedThisFrame&&Nearby())
-            {
-                var camera=Camera.main;
-                if(open&&Mathf.Abs(camera.transform.position.z-transform.position.z)<.75f)return;
-                open=!open;if(sound.clip)sound.Play();
-            }
-            amount=Mathf.MoveTowards(amount,open?1:0,Time.deltaTime*1.7f);
-            float t=Mathf.SmoothStep(0,1,amount);
-            left.localPosition=leftClosed-Vector3.right*(travel*t);
-            right.localPosition=rightClosed+Vector3.right*(travel*t);
-        }
-        void OnGUI()
-        {
-            if(Nearby())GUI.Box(new Rect(Screen.width/2-95,Screen.height-81,190,28),open?"E  ·  Close glass door":"E  ·  Open glass door");
+            var automatic=gameObject.AddComponent<AutomaticSlidingDoor>();
+            automatic.leftPanel=left;automatic.rightPanel=right;
+            automatic.leftTravel=Vector3.left*travel;automatic.rightTravel=Vector3.right*travel;
+            automatic.sensorHalfSize=new Vector3(travel,1.2f,.8f);
+            enabled=false;
         }
     }
 }
-
-
-
-
-
-
-
-
-

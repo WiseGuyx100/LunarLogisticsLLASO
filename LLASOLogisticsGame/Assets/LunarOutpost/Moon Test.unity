@@ -6045,6 +6045,52 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 22ef9cc24a3ce4b4d9fe6fb85d4cfea4, type: 3}
   m_PrefabInstance: {fileID: 104997717}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &106987529
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 106987531}
+  - component: {fileID: 106987530}
+  m_Layer: 0
+  m_Name: Local lighting optimization R8
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &106987530
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 106987529}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d7e1620aea5309dbdd89cc7c243cc4f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PixelPackersMission.LocalLightBudget
+  activeLights: 0
+  duplicateLights: 0
+--- !u!4 &106987531
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 106987529}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &107080384
 GameObject:
   m_ObjectHideFlags: 0
@@ -139092,3 +139138,4 @@ SceneRoots:
   - {fileID: 1426960664}
   - {fileID: 1850086528}
   - {fileID: 365065158}
+  - {fileID: 106987531}

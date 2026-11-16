@@ -17,12 +17,21 @@ public sealed class OutpostTour : MonoBehaviour
     Vector3 roverCenter, roverHalf;
     static readonly RaycastHit[] groundHits=new RaycastHit[24];
     float suspension;
+    Collider[] obstacleBuffer=new Collider[128];
+    static readonly float[] WheelSides={-.72f,.72f},WheelEnds={-.75f,.75f};
+    System.ArraySegment<Collider> Nearby(Vector3 center,Vector3 half,Quaternion rotation)
+    {
+        int count;
+        while((count=Physics.OverlapBoxNonAlloc(center,half,obstacleBuffer,rotation,~0,QueryTriggerInteraction.Ignore))==obstacleBuffer.Length)
+            System.Array.Resize(ref obstacleBuffer,obstacleBuffer.Length*2);
+        return new System.ArraySegment<Collider>(obstacleBuffer,0,count);
+    }
     static bool IsRock(Transform t){while(t){if(t.name=="Original lunar rock")return true;t=t.parent;}return false;}
     float RockRise(Vector3 position,Quaternion rotation)
     {
         float rise=0;
         // Sample the footprint, including the leading edge, before the chassis touches a stone.
-        foreach(var c in Physics.OverlapBox(position+Vector3.up*.5f,new Vector3(roverHalf.x+.25f,1.1f,roverHalf.z+.35f),rotation,~0,QueryTriggerInteraction.Ignore))
+        foreach(var c in Nearby(position+Vector3.up*.5f,new Vector3(roverHalf.x+.25f,1.1f,roverHalf.z+.35f),rotation))
         {
             if(!IsRock(c.transform)||c.bounds.size.y>Mathf.Min(.65f,maxRockStep))continue;
             var local=Quaternion.Inverse(rotation)*(c.bounds.center-position);
@@ -54,7 +63,7 @@ public sealed class OutpostTour : MonoBehaviour
 
     bool Blocked(Vector3 position,Quaternion rotation)
     {
-        foreach(var c in Physics.OverlapBox(position+rotation*roverCenter,roverHalf,rotation,~0,QueryTriggerInteraction.Ignore))
+        foreach(var c in Nearby(position+rotation*roverCenter,roverHalf,rotation))
             if(!(c is TerrainCollider)&&!c.transform.IsChildOf(transform)&&!c.transform.IsChildOf(view.transform.parent))
             {
                 if(IsRock(c.transform)&&c.bounds.size.y<=Mathf.Min(.65f,maxRockStep))continue;
@@ -123,8 +132,8 @@ public sealed class OutpostTour : MonoBehaviour
                 next.y=Ground(next);
                 // Sample the wheel footprint so the chassis rises before a low rock
                 // reaches its collision box. Tall obstacles still stop the rover.
-                foreach(float side in new[]{-.72f,.72f})
-                foreach(float fore in new[]{-.75f,.75f})
+                foreach(float side in WheelSides)
+                foreach(float fore in WheelEnds)
                 {
                     var probe=next+turn*new Vector3(side*roverHalf.x,0,fore*roverHalf.z);
                     next.y=Mathf.Max(next.y,Ground(probe));
@@ -214,7 +223,7 @@ public sealed class OutpostTour : MonoBehaviour
         if(busy&&!rover)
         {
             GUI.color=new Color(0,0,0,fade); GUI.DrawTexture(new Rect(0,0,Screen.width,Screen.height),Texture2D.whiteTexture); GUI.color=Color.white;
-            GUI.Label(new Rect(24,24,360,35),launch?"Transferring to lunar surfaceâ€¦":"Entering service levelâ€¦");
+            GUI.Label(new Rect(24,24,360,35),launch?"Transferring to lunar surface…":"Entering service level…");
         }
         else if(driving||Near())
         {
