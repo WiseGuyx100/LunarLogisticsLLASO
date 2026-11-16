@@ -70,6 +70,12 @@ public class ItemTracker : MonoBehaviour
         if (item != null) scanned.Add(item);
     }
 
+    // Has the player scanned this box with Q? (the AI helper asks this)
+    public bool HasScanned(ItemInfo item)
+    {
+        return item != null && scanned.Contains(item);
+    }
+
     void Update()
     {
         if (!GameControls.StoreLocationPressed()) return;

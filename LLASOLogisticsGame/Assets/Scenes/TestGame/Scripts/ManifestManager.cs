@@ -106,6 +106,27 @@ public class ManifestManager : MonoBehaviour
         }
     }
 
+    // ---------- Things the AI helper can ask ----------
+    public bool IsOpen { get { return panelOpen; } }
+
+    public string CurrentApp { get { return appNames[appIndex]; } }
+
+    // All items the manifest lists for one day (same rule the manifest screen uses)
+    public List<ItemData> GetItemsForDay(int day)
+    {
+        List<ItemData> result = new List<ItemData>();
+        if (InventoryDatabase.Instance == null) return result;
+
+        foreach (ItemData d in InventoryDatabase.Instance.GetAll())
+        {
+            if (IsAlways(d.missionDay)) continue;
+            if (ParseDays(d.missionDay).Contains(day)) result.Add(d);
+        }
+
+        result.Sort((a, b) => string.Compare(a.id, b.id));
+        return result;
+    }
+
     void Refresh()
     {
         if (InventoryDatabase.Instance == null) return;

@@ -1,0 +1,5 @@
+Team notes for the AI helper. One short tip per line. Keep this under about 15 lines.
+- Players often forget they must scan a box with Q before they can store its location with T.
+- The scanner must be taken out (press 1) before Q or T will work.
+- A red flash on a box means it is in the wrong zone. Tell the player which zone it belongs in.
+- DOES NOT FIT means the box is too big for that shelf or the shelf has no room. Suggest another shelf level or rack.
