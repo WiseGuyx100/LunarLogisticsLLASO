@@ -1,10 +1,10 @@
 newmtl Fac_White
-Kd 0.94 0.95 0.97
+Kd 0.96 0.97 0.98
 Ka 0 0 0
 Ks 0 0 0
 
 newmtl Fac_Grey
-Kd 0.50 0.53 0.58
+Kd 0.58 0.61 0.67
 Ka 0 0 0
 Ks 0 0 0
 
@@ -19,7 +19,7 @@ Ka 0 0 0
 Ks 0 0 0
 
 newmtl Fac_LightBlue
-Kd 0.50 0.78 0.96
+Kd 0.62 0.83 0.97
 Ka 0 0 0
 Ks 0 0 0
 
@@ -29,29 +29,28 @@ Ka 0 0 0
 Ks 0 0 0
 
 newmtl Fac_DarkSteel
-Kd 0.14 0.15 0.18
+Kd 0.30 0.32 0.37
 Ka 0 0 0
 Ks 0 0 0
 
 newmtl Fac_Roof
-Kd 0.78 0.80 0.84
+Kd 0.88 0.90 0.93
 Ka 0 0 0
 Ks 0 0 0
 
 newmtl Fac_Glass
-Kd 0.62 0.84 0.97
+Kd 0.72 0.88 0.97
 Ka 0 0 0
 Ks 0 0 0
-d 0.30
-Tr 0.70
+d 0.28
+Tr 0.72
 
 newmtl Fac_Floor
-Kd 0.70 0.72 0.76
+Kd 0.84 0.86 0.90
 Ka 0 0 0
 Ks 0 0 0
 
 newmtl Fac_Light
-Kd 0.98 0.98 1.00
+Kd 1.00 1.00 1.00
 Ka 0 0 0
 Ks 0 0 0
-
